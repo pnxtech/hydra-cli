@@ -1,0 +1,21 @@
+{
+  "name": "hydra-cli",
+  "version": "0.0.1",
+  "description": "Hydra Commandline Interface",
+  "author": "Carlos Justiniano <carlos.justiniano@gmail.com>",
+  "keywords": [
+    "hydra"
+  ],
+  "analyze": false,
+  "license": "MIT",
+  "engines": {
+    "node": ">=6.2.1"
+  },
+  "dependencies": {
+    "moment": "2.14.1",
+    "redis": "2.6.2"
+  },
+  "bin": {
+    "hydra-cli": "hydra-cli.js"
+  }
+}

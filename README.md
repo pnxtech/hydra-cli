@@ -1,2 +1,11 @@
 # hydra-cli
-Hydra Commandline Client
+Hydra Commandline Interface
+
+
+## Commands
+
+#### Config
+
+```
+$ hydra-cli config
+```
