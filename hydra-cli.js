@@ -30,11 +30,13 @@ class Program {
     console.log('Commands:');
     console.log('  help                       - this help list');
     console.log('  config                     - configure connection to redis');
+    console.log('  config list                - display current configuration');
     console.log('  nodes                      - same as nodes lists');
     console.log('  nodes list [serviceName]   - display service instance nodes');
     console.log('  nodes remove id            - remove a service from nodes list');
     console.log('  routes [serviceName]       - display service API routes');
     console.log('  healthlog serviceName      - display service health log');
+    console.log('');
   }
 
   /**
@@ -178,6 +180,11 @@ class Program {
   * @param {array} args - program arguments
   */
   handleConfigCommand(args) {
+    if (args.length === 1 && args[0] === 'list')  {
+      console.log(JSON.stringify(this.configData, null, 2));
+      process.exit();
+      return;
+    }
     let prompts = rl.createInterface(process.stdin, process.stdout);
     prompts.question('redisUrl: ', (redisUrl) => {
       prompts.question('redisPort: ', (redisPort) => {
