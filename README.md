@@ -9,7 +9,7 @@ $ sudo npm install -g hydra-cli
 
 #### Commands
 
-```shell
+```
 hydra-cli version 0.0.1
 Usage: hydra-cli command [parameters]
 
