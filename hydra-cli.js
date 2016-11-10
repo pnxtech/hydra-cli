@@ -83,7 +83,6 @@ class Program {
               this.handleNodesRemove(args);
               break;
             default:
-              console.log('args.length', args.length);
               if (args.length === 0) {
                 this.handleNodesList(args);
               } else {
@@ -232,7 +231,6 @@ class Program {
   * @param {array} args - program arguments
   */
   handleNodesRemove(args) {
-    console.log('args', args);
     if (args.length !== 2) {
       console.log('Missing parameter id');
       this.exitApp();
