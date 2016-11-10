@@ -1,6 +1,12 @@
 # hydra-cli
 Hydra command line interface for use with [Hydra](https://github.com/flywheelsports/fwsp-hydra) enabled microservices.
 
+#### install
+
+```shell
+$ sudo npm install -g hydra-cli
+```
+
 #### Commands
 
 ```shell
