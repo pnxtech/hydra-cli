@@ -10,7 +10,7 @@ $ sudo npm install -g hydra-cli
 #### Commands
 
 ```
-hydra-cli version 0.0.1
+hydra-cli version 0.1.0
 Usage: hydra-cli command [parameters]
 
 A command line interface for Hydra services
@@ -18,6 +18,7 @@ A command line interface for Hydra services
 Commands:
   help                       - this help list
   config                     - configure connection to redis
+  config list                - display current configuration
   nodes                      - same as nodes lists
   nodes list [serviceName]   - display service instance nodes
   nodes remove id            - remove a service from nodes list
