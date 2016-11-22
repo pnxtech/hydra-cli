@@ -1,13 +1,13 @@
 # hydra-cli
 Hydra command line interface for use with [Hydra](https://github.com/flywheelsports/fwsp-hydra) enabled microservices.
 
-#### install
+## install
 
 ```shell
 $ [sudo] npm install -g hydra-cli
 ```
 
-#### Commands
+## Command overview
 
 ```
 hydra-cli version 0.3.0
@@ -30,10 +30,10 @@ Commands:
   services [serviceName]      - display list of servers
 ```
 
-#### help
+## help
 Lists the help screen above.
 
-#### config
+## config
 
 Hydra-cli requires that you first point it to the instance of Redis which your microservices are using.
 
@@ -44,7 +44,7 @@ redisPort: 6379
 redisDb: 15
 ```
 
-#### config list
+## config list
 Lists your config settings.
 
 ```javascript
@@ -57,7 +57,7 @@ $ hydra-cli config list
 }
 ```
 
-#### health
+## health
 The health command displays the health of services which are currently running.
 If you specify the name of a service than only that service is displayed.
 
@@ -107,7 +107,7 @@ $ hydra-cli health
 ]
 ```
 
-#### healthlog
+## healthlog
 Displays internal log for a service. The serviceName is required.
 
 ```shell
@@ -115,7 +115,7 @@ $ hydra-cli healthlog red-service
 fatal | 2016-11-22T16:51:58.609Z PID:12664: Port 6000 is already in use
 ```
 
-#### message create
+## message create
 The `message create` command will create a UMF message which you can customize for use with the `message send` command.
 
 ```shell
@@ -132,7 +132,7 @@ $ hydra-cli message create
 
 Just edit the to field with the name of the service you'd like to send a message to.
 
-#### message send
+## message send
 
 The `message send` command sends a message to a service. Use the `message create` command to create a message and place it in a file, such as message.json.
 
@@ -140,7 +140,7 @@ The `message send` command sends a message to a service. Use the `message create
 $ hydra-cli message send message.json
 ```
 
-#### nodes
+## nodes
 
 Displays a list of services instances (called nodes). If you specify a serviceName then only service instances with that name will be displayed.
 
@@ -172,7 +172,7 @@ $ hydra-cli nodes
 ]
 ```
 
-#### rest
+## rest
 The `rest` command allows you to make a RESTful API call to a service which exposes HTTP endpoints.
 
 Note the use of the path `hello-service:[get]/` below. This format is required.  
@@ -227,7 +227,7 @@ $ hydra-cli rest hello-service:/
 }
 ```
 
-#### routes
+## routes
 The routes command will display routes which services register via hydra-express or via the use of the hydra.registerRoute call.
 
 ```javascript
@@ -240,7 +240,7 @@ $ hydra-cli routes
 }
 ```
 
-#### services
+## services
 
 Display a list of registered services.  
 
