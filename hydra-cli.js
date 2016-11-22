@@ -35,14 +35,14 @@ class Program {
     console.log('  help                        - this help list');
     console.log('  config                      - configure connection to redis');
     console.log('  config list                 - display current configuration');
+    console.log('  health [serviceName]        - display service health');
+    console.log('  healthlog serviceName       - display service health log');
     console.log('  message create              - create a message object');
     console.log('  message send message.json   - send a message');
-    console.log('  nodes                       - same as nodes lists');
-    console.log('  nodes list [serviceName]    - display service instance nodes');
-    console.log('  nodes remove id             - remove a service from nodes list');
+    console.log('  nodes [serviceName]         - display service instance nodes');
     console.log('  rest path [payload.json]    - make an HTTP RESTful call to a service');
     console.log('  routes [serviceName]        - display service API routes');
-    console.log('  healthlog serviceName       - display service health log');
+    console.log('  services [serviceName]      - display list of servers');
     console.log('');
   }
 
@@ -96,6 +96,12 @@ class Program {
         case 'config':
           this.handleConfigCommand(args);
           break;
+        case 'health':
+          this.handleHealth(args);
+          break;
+        case 'healthlog':
+          this.handleHealthLog(args);
+          break;
         case 'help':
           this.displayHelp();
           process.exit();
@@ -115,22 +121,7 @@ class Program {
           }
           break;
         case 'nodes':
-          switch (args[0]) {
-            case 'list':
-              this.handleNodesList(args);
-              break;
-            case 'remove':
-              this.handleNodesRemove(args);
-              break;
-            default:
-              if (args.length === 0) {
-                this.handleNodesList(args);
-              } else {
-                console.log(`Unknown nodes options: ${args[0]}`);
-                this.exitApp();
-              }
-              break;
-          }
+          this.handleNodesList(args);
           break;
         case 'rest':
           this.handleRest(args);
@@ -138,8 +129,8 @@ class Program {
         case 'routes':
           this.handleRoutes(args);
           break;
-        case 'healthlog':
-          this.handleHealthLog(args);
+        case 'services':
+          this.handleServices(args);
           break;
         default:
           console.log(`Unknown command: ${command}`);
@@ -271,40 +262,48 @@ class Program {
   }
 
   /**
+  * @name handleHealth
+  * @description display service health
+  * @param {array} args - program arguments
+  */
+  handleHealth(args) {
+    let serviceName = args[0];
+    let entries = [];
+    hydra.getServiceHealthAll()
+      .then((services) => {
+        services.forEach((service) => {
+          if (serviceName && service.health[0].serviceName === serviceName) {
+            entries.push(service.health);
+          }
+          if (!serviceName) {
+            entries.push(service.health);
+          }
+        });
+        this.displayJSON(entries);
+        this.exitApp();
+      });
+  }
+
+  /**
   * @name handleHealthLog
   * @description display service health log
   * @param {array} args - program arguments
   */
   handleHealthLog(args) {
-    this.redisConnect()
-      .then(() => {
-        this.getKeys(`*:${args[0]}:*:health:log`)
-          .then((instances) => {
-            if (instances.length === 0) {
-              console.log('[]');
-              this.exitApp();
-              return;
-            }
-            let trans = this.redisdb.multi();
-            instances.forEach((instance) => {
-              trans.lrange(instance, 0, 100);
-            });
-            trans.exec((err, result) => {
-              if (err) {
-                console.log(err);
-              } else {
-                let response = [];
-                if (result || result.length > 0) {
-                  result = result[0];
-                  result.forEach((entry) => {
-                    response.push(Utils.safeJSONParse(entry));
-                  });
-                }
-                console.log(JSON.stringify(response, null, 2));
-              }
-              this.exitApp();
-            });
-          });
+    let serviceName = args[0];
+
+    if (!serviceName) {
+      console.log('Missing serviceName');
+      this.exitApp();
+      return;
+    }
+
+    hydra.getServiceHealthLog(serviceName)
+      .then((logs) => {
+        logs.forEach((entry) => {
+          console.error(`${entry.type} | ${entry.ts} PID:${entry.processID}: ${entry.message}`);
+        });
+        this.exitApp();
       });
   }
 
@@ -352,50 +351,21 @@ class Program {
   * @param {array} args - program arguments
   */
   handleNodesList(args) {
-    this.redisConnect()
-      .then(() => {
-        let now = moment.now();
-        this.redisdb.hgetall(`${redisPreKey}:nodes`, (err, data) => {
-          if (err) {
-            console.log(err);
-          } else {
-            if (data !== null) {
-              let nodes = [];
-              Object.keys(data).forEach((entry) => {
-                let item = Utils.safeJSONParse(data[entry]);
-                if ((args.length === 0 || args.length === 1) || (args.length === 2 && item.serviceName.indexOf(args[1]) > -1)) {
-                  item.elapsed = parseInt(moment.duration(now - moment(item.updatedOn)) / 1000);
-                  nodes.push(item);
-                }
-              });
-              console.log(JSON.stringify(nodes, null, 2));
+    hydra.getServiceNodes()
+      .then((nodes) => {
+        let serviceList = [];
+        let serviceName = args[0];
+        if (serviceName) {
+          nodes.forEach((service) => {
+            if (serviceName === service.serviceName) {
+              serviceList.push(service);
             }
-          }
-          this.exitApp();
-        });
-      });
-  }
-
-  /**
-  * @name handleNodesRemove
-  * @description handle the removal of service node data.
-  * @param {array} args - program arguments
-  */
-  handleNodesRemove(args) {
-    if (args.length !== 2) {
-      console.log('Missing parameter id');
-      this.exitApp();
-    }
-    this.redisConnect()
-      .then(() => {
-        this.redisdb.hdel(`${redisPreKey}:nodes`, args[1], (err, data) => {
-          if (err) {
-            console.log(err);
-          } else {
-            console.log(`nodes entry ${args[1]} removed`);
-          }
-          this.exitApp();
-        });
+          });
+        } else {
+          serviceList = nodes;
+        }
+        this.displayJSON(serviceList);
+        this.exitApp();
       });
   }
 
@@ -412,14 +382,12 @@ class Program {
       this.exitApp();
       return;
     }
-
     let method = route.httpMethod || 'get';
     if ((method === 'get' || method === 'delete') && args.length > 1) {
       console.log(`Payload not allowed for HTTP '${method}' method`);
       this.exitApp();
       return;
     }
-
     if (args.length > 1) {
       config.init(args[1])
         .then(() => {
@@ -440,6 +408,7 @@ class Program {
           return null;
         })
         .catch((err) => {
+          console.log('err', err);
           console.log(`Unable to open ${args[1]}`);
           this.exitApp();
         });
@@ -468,36 +437,41 @@ class Program {
   * @param {array} args - program arguments
   */
   handleRoutes(args) {
-    this.redisConnect()
-      .then(() => {
-        let promises = [];
-        let serviceNames = [];
-        this.getKeys('*:routes')
-          .then((serviceRoutes) => {
-            serviceRoutes.forEach((service) => {
-              let segments = service.split(':');
-              let serviceName = segments[2];
-              if (args.length === 0 || (args.length === 1 && serviceName.indexOf(args[0]) > -1)) {
-                serviceNames.push(serviceName);
-                promises.push(this.getRoutes(serviceName));
-              }
-            });
-            return Promise.all(promises);
-          })
-          .then((routes) => {
-            let resObj = {};
-            let idx = 0;
-            routes.forEach((routesList) => {
-              resObj[serviceNames[idx]] = routesList;
-              idx += 1;
-            });
-            console.log(JSON.stringify(resObj, null, 2));
-            this.exitApp();
-          })
-          .catch((err) => {
-            console.log(err);
-            this.exitApp();
+    let routeList = [];
+    hydra.getAllServiceRoutes()
+      .then((routes) => {
+        let serviceName = args[0];
+        if (serviceName) {
+          routes = {
+            serviceName : routes[serviceName]
+          };
+        }
+        this.displayJSON(routes);
+        this.exitApp();
+      });
+  }
+
+  /**
+  * @name handleServices
+  * @description display list of services
+  * @param {array} args - program arguments
+  */
+  handleServices(args) {
+    hydra.getServices()
+      .then((services) => {
+        let serviceList = [];
+        let serviceName = args[0];
+        if (serviceName) {
+          services.forEach((service) => {
+            if (serviceName === service.serviceName) {
+              serviceList.push(service);
+            }
           });
+        } else {
+          serviceList = services;
+        }
+        this.displayJSON(serviceList);
+        this.exitApp();
       });
   }
 }
