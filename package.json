@@ -1,6 +1,6 @@
 {
   "name": "hydra-cli",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Hydra Commandline Interface",
   "author": "Carlos Justiniano <carlos.justiniano@gmail.com>",
   "keywords": [
@@ -13,7 +13,10 @@
   },
   "dependencies": {
     "bluebird": "3.4.6",
+    "fwsp-config": "1.0.4",
+    "fwsp-hydra": "0.11.0",
     "fwsp-jsutils": "1.0.8",
+    "fwsp-umf-message": "0.4.3",
     "moment": "2.14.1",
     "redis": "2.6.2"
   },

@@ -6,7 +6,10 @@ const rl = require('readline');
 const Promise = require('bluebird');
 const moment = require('moment');
 const redis = require('redis');
+const hydra = require('fwsp-hydra');
 const Utils = require('fwsp-jsutils');
+const config = require('fwsp-config');
+const UMFMessage = require('fwsp-umf-message');
 const version = require('./package.json').version;
 const redisPreKey = 'hydra:service';
 
@@ -24,18 +27,22 @@ class Program {
   displayHelp() {
     console.log(`hydra-cli version ${version}`);
     console.log('Usage: hydra-cli command [parameters]');
+    console.log('See docs at: https://github.com/flywheelsports/hydra-cli');
     console.log('');
     console.log('A command line interface for Hydra services');
     console.log('');
     console.log('Commands:');
-    console.log('  help                       - this help list');
-    console.log('  config                     - configure connection to redis');
-    console.log('  config list                - display current configuration');
-    console.log('  nodes                      - same as nodes lists');
-    console.log('  nodes list [serviceName]   - display service instance nodes');
-    console.log('  nodes remove id            - remove a service from nodes list');
-    console.log('  routes [serviceName]       - display service API routes');
-    console.log('  healthlog serviceName      - display service health log');
+    console.log('  help                        - this help list');
+    console.log('  config                      - configure connection to redis');
+    console.log('  config list                 - display current configuration');
+    console.log('  message create              - create a message object');
+    console.log('  message send message.json   - send a message');
+    console.log('  nodes                       - same as nodes lists');
+    console.log('  nodes list [serviceName]    - display service instance nodes');
+    console.log('  nodes remove id             - remove a service from nodes list');
+    console.log('  rest path [payload.json]    - make an HTTP RESTful call to a service');
+    console.log('  routes [serviceName]        - display service API routes');
+    console.log('  healthlog serviceName       - display service health log');
     console.log('');
   }
 
@@ -64,6 +71,19 @@ class Program {
       if (!err) {
         try {
           this.configData = JSON.parse(data);
+          let conf = {
+            'serviceName': 'hydra-cli',
+            'serviceDescription': 'Not a service',
+            'serviceIP': '',
+            'servicePort': 0,
+            'serviceType': 'non',
+            'redis': {
+              'url': this.configData.redisUrl,
+              'port': this.configData.redisPort,
+              'db': this.configData.redisDb
+            }
+          };
+          hydra.init(conf);
         } catch (e) {
           this.configData = null;
         }
@@ -75,6 +95,24 @@ class Program {
       switch (command) {
         case 'config':
           this.handleConfigCommand(args);
+          break;
+        case 'help':
+          this.displayHelp();
+          process.exit();
+          break;
+        case 'message':
+          switch (args[0]) {
+            case 'create':
+              this.handleMessageCreate(args);
+              break;
+            case 'send':
+              this.handleMessageSend(args);
+              break;
+            default:
+              console.log(`Unknown message options: ${args[0]}`);
+              this.exitApp();
+              break;
+          }
           break;
         case 'nodes':
           switch (args[0]) {
@@ -94,11 +132,18 @@ class Program {
               break;
           }
           break;
+        case 'rest':
+          this.handleRest(args);
+          break;
         case 'routes':
           this.handleRoutes(args);
           break;
         case 'healthlog':
           this.handleHealthLog(args);
+          break;
+        default:
+          console.log(`Unknown command: ${command}`);
+          this.exitApp();
           break;
       }
     });
@@ -124,11 +169,14 @@ class Program {
   * @description properly exit this app
   */
   exitApp() {
-    if (this.redisdb) {
-      this.redisdb.quit();
-    }
-    console.log(' ');
-    process.exit();
+    setTimeout(() => {
+      hydra.shutdown();
+      if (this.redisdb) {
+        this.redisdb.quit();
+      }
+      console.log(' ');
+      process.exit();
+    }, 250);
   }
 
   /**
@@ -169,6 +217,24 @@ class Program {
     });
   }
 
+  /**
+  * @name displayJSON
+  * @description pretty print json
+  * @param {string} json - stringified json
+  */
+  displayJSON(json) {
+    if (typeof json === 'string') {
+      let js = Utils.safeJSONParse(json);
+      if (!js) {
+        console.log(json);
+      } else {
+        console.log(JSON.stringify(js, null, 2));
+      }
+    } else {
+      console.log(JSON.stringify(json, null, 2));
+    }
+  }
+
   /* ************************************************************************* */
   /* ************************************************************************* */
   /* ************************************************************************* */
@@ -205,6 +271,82 @@ class Program {
   }
 
   /**
+  * @name handleHealthLog
+  * @description display service health log
+  * @param {array} args - program arguments
+  */
+  handleHealthLog(args) {
+    this.redisConnect()
+      .then(() => {
+        this.getKeys(`*:${args[0]}:*:health:log`)
+          .then((instances) => {
+            if (instances.length === 0) {
+              console.log('[]');
+              this.exitApp();
+              return;
+            }
+            let trans = this.redisdb.multi();
+            instances.forEach((instance) => {
+              trans.lrange(instance, 0, 100);
+            });
+            trans.exec((err, result) => {
+              if (err) {
+                console.log(err);
+              } else {
+                let response = [];
+                if (result || result.length > 0) {
+                  result = result[0];
+                  result.forEach((entry) => {
+                    response.push(Utils.safeJSONParse(entry));
+                  });
+                }
+                console.log(JSON.stringify(response, null, 2));
+              }
+              this.exitApp();
+            });
+          });
+      });
+  }
+
+  /**
+  * @name handleMessageCreate
+  * @description Display a new message
+  * @param {array} args - program arguments
+  */
+  handleMessageCreate(args) {
+    let msg = UMFMessage.createMessage({
+      to: '{serviceName here}:/',
+      from: 'hydra-cli:/',
+      body: {}
+    });
+    this.displayJSON(msg);
+    this.exitApp();
+  }
+
+  /**
+  * @name handleMessageSend
+  * @description Send message
+  * @param {array} args - program arguments
+  */
+  handleMessageSend(args) {
+    if (args.length !== 2) {
+      console.log('Invalid number of parameters');
+      this.exitApp();
+      return;
+    }
+    config.init(args[1])
+      .then(() => {
+        hydra.sendMessage(config.getObject());
+        this.exitApp();
+        return null;
+      })
+      .catch((err) => {
+        console.log(err.message);
+        this.exitApp();
+      });
+  }
+
+  /**
   * @name handleNodesList
   * @description handle the display of service nodes.
   * @param {array} args - program arguments
@@ -217,15 +359,17 @@ class Program {
           if (err) {
             console.log(err);
           } else {
-            let nodes = [];
-            Object.keys(data).forEach((entry) => {
-              let item = Utils.safeJSONParse(data[entry]);
-              if ((args.length === 0 || args.length === 1) || (args.length === 2 && item.serviceName.indexOf(args[1]) > -1)) {
-                item.elapsed = parseInt(moment.duration(now - moment(item.updatedOn)) / 1000);
-                nodes.push(item);
-              }
-            });
-            console.log(JSON.stringify(nodes, null, 2));
+            if (data !== null) {
+              let nodes = [];
+              Object.keys(data).forEach((entry) => {
+                let item = Utils.safeJSONParse(data[entry]);
+                if ((args.length === 0 || args.length === 1) || (args.length === 2 && item.serviceName.indexOf(args[1]) > -1)) {
+                  item.elapsed = parseInt(moment.duration(now - moment(item.updatedOn)) / 1000);
+                  nodes.push(item);
+                }
+              });
+              console.log(JSON.stringify(nodes, null, 2));
+            }
           }
           this.exitApp();
         });
@@ -253,6 +397,69 @@ class Program {
           this.exitApp();
         });
       });
+  }
+
+  /**
+  * @name handleRest
+  * @description handle RESTful calls
+  * @param {array} args - program arguments
+  * @return {undefined}
+  */
+  handleRest(args) {
+    let route = UMFMessage.parseRoute(args[0]);
+    if (route.error) {
+      console.log(`${route.error}`);
+      this.exitApp();
+      return;
+    }
+
+    let method = route.httpMethod || 'get';
+    if ((method === 'get' || method === 'delete') && args.length > 1) {
+      console.log(`Payload not allowed for HTTP '${method}' method`);
+      this.exitApp();
+      return;
+    }
+
+    if (args.length > 1) {
+      config.init(args[1])
+        .then(() => {
+          let msg = UMFMessage.createMessage({
+            to: `${args[0]}`,
+            from: 'hydra-cli:/',
+            body: config.getObject() || {}
+          });
+          hydra.makeAPIRequest(msg)
+            .then((res) => {
+              this.displayJSON(res);
+              this.exitApp();
+            })
+            .catch((err) => {
+              console.log('err', err);
+              this.exitApp();
+            });
+          return null;
+        })
+        .catch((err) => {
+          console.log(`Unable to open ${args[1]}`);
+          this.exitApp();
+        });
+    } else {
+      let msg = UMFMessage.createMessage({
+        to: `${args[0]}`,
+        from: 'hydra-cli:/',
+        body: {}
+      });
+      hydra.makeAPIRequest(msg)
+        .then((res) => {
+          this.displayJSON(res);
+          this.exitApp();
+        })
+        .catch((err) => {
+          console.log('err', err);
+          this.exitApp();
+        });
+      return null;
+    }
   }
 
   /**
@@ -290,44 +497,6 @@ class Program {
           .catch((err) => {
             console.log(err);
             this.exitApp();
-          });
-      });
-  }
-
-  /**
-  * @name handleHealthLog
-  * @description display service health log
-  * @param {array} args - program arguments
-  */
-  handleHealthLog(args) {
-    this.redisConnect()
-      .then(() => {
-        this.getKeys(`*:${args[0]}:*:health:log`)
-          .then((instances) => {
-            if (instances.length === 0) {
-              console.log('[]');
-              this.exitApp();
-              return;
-            }
-            let trans = this.redisdb.multi();
-            instances.forEach((instance) => {
-              trans.lrange(instance, 0, 100);
-            });
-            trans.exec((err, result) => {
-              if (err) {
-                console.log(err);
-              } else {
-                let response = [];
-                if (result || result.length > 0) {
-                  result = result[0];
-                  result.forEach((entry) => {
-                    response.push(Utils.safeJSONParse(entry));
-                  });
-                }
-                console.log(JSON.stringify(response, null, 2));
-              }
-              this.exitApp();
-            });
           });
       });
   }

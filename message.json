@@ -1,0 +1,10 @@
+{
+  "to": "hello-service:/",
+  "from": "hydra-cli:/",
+  "mid": "d22dc384-6bf7-4f73-9cb6-867faab15311",
+  "timestamp": "2016-11-21T21:16:37.626Z",
+  "version": "UMF/1.4.3",
+  "body": {
+    "message": "Hello from the hydra-cli app"
+  }
+}
