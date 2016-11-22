@@ -36,7 +36,7 @@ class Program {
     console.log('  config                      - configure connection to redis');
     console.log('  config list                 - display current configuration');
     console.log('  message create              - create a message object');
-    console.log('  message send [message.json] - send a message');
+    console.log('  message send message.json   - send a message');
     console.log('  nodes                       - same as nodes lists');
     console.log('  nodes list [serviceName]    - display service instance nodes');
     console.log('  nodes remove id             - remove a service from nodes list');
@@ -169,12 +169,14 @@ class Program {
   * @description properly exit this app
   */
   exitApp() {
-    hydra.shutdown();
-    if (this.redisdb) {
-      this.redisdb.quit();
-    }
-    console.log(' ');
-    process.exit();
+    setTimeout(() => {
+      hydra.shutdown();
+      if (this.redisdb) {
+        this.redisdb.quit();
+      }
+      console.log(' ');
+      process.exit();
+    }, 250);
   }
 
   /**
@@ -269,21 +271,6 @@ class Program {
   }
 
   /**
-  * @name handleMessageCreate
-  * @description Display a new message
-  * @param {array} args - program arguments
-  */
-  handleMessageCreate(args) {
-    let msg = UMFMessage.createMessage({
-      to: '{serviceName here}:/',
-      from: 'hydra-cli:/',
-      body: {}
-    });
-    this.displayJSON(msg);
-    this.exitApp();
-  }
-
-  /**
   * @name handleHealthLog
   * @description display service health log
   * @param {array} args - program arguments
@@ -322,13 +309,41 @@ class Program {
   }
 
   /**
+  * @name handleMessageCreate
+  * @description Display a new message
+  * @param {array} args - program arguments
+  */
+  handleMessageCreate(args) {
+    let msg = UMFMessage.createMessage({
+      to: '{serviceName here}:/',
+      from: 'hydra-cli:/',
+      body: {}
+    });
+    this.displayJSON(msg);
+    this.exitApp();
+  }
+
+  /**
   * @name handleMessageSend
   * @description Send message
   * @param {array} args - program arguments
   */
   handleMessageSend(args) {
-    console.log('handleMessageSend args', args);
-    this.exitApp();
+    if (args.length !== 2) {
+      console.log('Invalid number of parameters');
+      this.exitApp();
+      return;
+    }
+    config.init(args[1])
+      .then(() => {
+        hydra.sendMessage(config.getObject());
+        this.exitApp();
+        return null;
+      })
+      .catch((err) => {
+        console.log(err.message);
+        this.exitApp();
+      });
   }
 
   /**
@@ -344,15 +359,17 @@ class Program {
           if (err) {
             console.log(err);
           } else {
-            let nodes = [];
-            Object.keys(data).forEach((entry) => {
-              let item = Utils.safeJSONParse(data[entry]);
-              if ((args.length === 0 || args.length === 1) || (args.length === 2 && item.serviceName.indexOf(args[1]) > -1)) {
-                item.elapsed = parseInt(moment.duration(now - moment(item.updatedOn)) / 1000);
-                nodes.push(item);
-              }
-            });
-            console.log(JSON.stringify(nodes, null, 2));
+            if (data !== null) {
+              let nodes = [];
+              Object.keys(data).forEach((entry) => {
+                let item = Utils.safeJSONParse(data[entry]);
+                if ((args.length === 0 || args.length === 1) || (args.length === 2 && item.serviceName.indexOf(args[1]) > -1)) {
+                  item.elapsed = parseInt(moment.duration(now - moment(item.updatedOn)) / 1000);
+                  nodes.push(item);
+                }
+              });
+              console.log(JSON.stringify(nodes, null, 2));
+            }
           }
           this.exitApp();
         });
