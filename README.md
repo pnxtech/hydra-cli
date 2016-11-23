@@ -10,6 +10,7 @@ $ [sudo] npm install -g hydra-cli
 ## Command overview
 
 ```
+$ hydra-cli
 hydra-cli version 0.3.0
 Usage: hydra-cli command [parameters]
 See docs at: https://github.com/flywheelsports/hydra-cli
@@ -32,6 +33,10 @@ Commands:
 
 ## help
 Lists the help screen above.
+> syntax: hydra-cli config list
+```shell
+$ hydra-cli
+```
 
 ## config
 
