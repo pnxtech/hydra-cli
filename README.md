@@ -125,13 +125,19 @@ $ hydra-cli health
 ## healthlog
 Displays internal log for a service. The serviceName is required.
 
+> syntax: hydra-cli healthlog serviceName
+
+> serviceName is required
+
 ```shell
 $ hydra-cli healthlog red-service
 fatal | 2016-11-22T16:51:58.609Z PID:12664: Port 6000 is already in use
 ```
 
 ## message create
-The `message create` command will create a UMF message which you can customize for use with the `message send` command.
+The `message create` command will create a [UMF](https://github.com/cjus/umf) message which you can customize for use with the `message send` command.
+
+> syntax: hydra-cli message create
 
 ```shell
 $ hydra-cli message create
@@ -149,7 +155,11 @@ Just edit the to field with the name of the service you'd like to send a message
 
 ## message send
 
-The `message send` command sends a message to a service. Use the `message create` command to create a message and place it in a file, such as message.json.
+> syntax: hydra-cli send message.json
+
+> message.json is the name of a file containing JSON which you wish to send.  This field is required.
+
+The `message send` command sends a [UMF](https://github.com/cjus/umf) fomatted message to a service. Use the `message create` command to create a message and place it in a file, such as message.json.
 
 ```shell
 $ hydra-cli message send message.json
@@ -158,6 +168,10 @@ $ hydra-cli message send message.json
 ## nodes
 
 Displays a list of services instances (called nodes). If you specify a serviceName then only service instances with that name will be displayed.
+
+> syntax: hydra-cli nodes [serviceName]
+
+> serviceName is optional
 
 ```javascript
 $ hydra-cli nodes
@@ -190,6 +204,10 @@ $ hydra-cli nodes
 ## rest
 The `rest` command allows you to make a RESTful API call to a service which exposes HTTP endpoints.
 
+> syntax: hydra-cli rest path [payload.json]
+
+> payload is a file containing JSON which you wish to send with POST and PUT calls.
+
 Note the use of the path `hello-service:[get]/` below. This format is required.  
 The full format is: `{serviceID}@{serviceName}:{HTTP method get/post/put/delete etc...}{API path}
 
@@ -202,7 +220,6 @@ $ hydra-cli rest a921a00de7caf9103a0d96346b3a61f8@hello-service:[get]/v1/hello/g
 You may supply a file to upload when using `post` and `put` HTTP calls.
 
 > You can locate a service's instance using the `hydra-cli nodes` command.
-
 
 ```javascript
 $ hydra-cli rest hello-service:[get]/
@@ -245,6 +262,8 @@ $ hydra-cli rest hello-service:/
 ## routes
 The routes command will display routes which services register via hydra-express or via the use of the hydra.registerRoute call.
 
+> syntax: hydra-cli routes
+
 ```javascript
 $ hydra-cli routes
 {
@@ -258,6 +277,8 @@ $ hydra-cli routes
 ## services
 
 Display a list of registered services.  
+
+> syntax: hydra-cli services
 
 ```javascript
 $ hydra-cli services
