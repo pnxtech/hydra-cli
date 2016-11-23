@@ -34,15 +34,17 @@ Commands:
 ## help
 Lists the help screen above.
 
-> syntax: hydra-cli config list
+> syntax: hydra-cli help
 
 ```shell
-$ hydra-cli
+$ hydra-cli help
 ```
 
 ## config
 
 Hydra-cli requires that you first point it to the instance of Redis which your microservices are using.
+
+> syntax: hydra-cli config 
 
 ```shell
 $ hydra-cli config
@@ -53,6 +55,8 @@ redisDb: 15
 
 ## config list
 Lists your config settings.
+
+> syntax: hydra-cli config list
 
 ```javascript
 $ hydra-cli config list
@@ -67,6 +71,9 @@ $ hydra-cli config list
 ## health
 The health command displays the health of services which are currently running.
 If you specify the name of a service than only that service is displayed.
+
+> syntax: hydra-cli health [serviceName]
+> serviceName is optional
 
 ```javascript
 $ hydra-cli health
