@@ -33,7 +33,9 @@ Commands:
 
 ## help
 Lists the help screen above.
+
 > syntax: hydra-cli config list
+
 ```shell
 $ hydra-cli
 ```
