@@ -73,6 +73,7 @@ The health command displays the health of services which are currently running.
 If you specify the name of a service than only that service is displayed.
 
 > syntax: hydra-cli health [serviceName]
+
 > serviceName is optional
 
 ```javascript
