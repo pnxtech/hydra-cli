@@ -11,24 +11,24 @@ $ [sudo] npm install -g hydra-cli
 
 ```
 $ hydra-cli
-hydra-cli version 0.3.0
+hydra-cli version 0.3.2
 Usage: hydra-cli command [parameters]
 See docs at: https://github.com/flywheelsports/hydra-cli
 
 A command line interface for Hydra services
 
 Commands:
-  help                        - this help list
-  config                      - configure connection to redis
-  config list                 - display current configuration
-  health [serviceName]        - display service health
-  healthlog serviceName       - display service health log
-  message create              - create a message object
-  message send message.json   - send a message
-  nodes [serviceName]         - display service instance nodes
-  rest path [payload.json]    - make an HTTP RESTful call to a service
-  routes [serviceName]        - display service API routes
-  services [serviceName]      - display list of servers
+  help                         - this help list
+  config                       - configure connection to redis
+  config list                  - display current configuration
+  health [serviceName]         - display service health
+  healthlog serviceName        - display service health log
+  message create               - create a message object
+  message send message.json    - send a message
+  nodes [serviceName]          - display service instance nodes
+  rest path [payload.json]     - make an HTTP RESTful call to a service
+  routes [serviceName]         - display service API routes
+  services [serviceName]       - display list of registered services
 ```
 
 ## help
@@ -44,7 +44,7 @@ $ hydra-cli help
 
 Hydra-cli requires that you first point it to the instance of Redis which your microservices are using.
 
-> syntax: hydra-cli config 
+> syntax: hydra-cli config
 
 ```shell
 $ hydra-cli config

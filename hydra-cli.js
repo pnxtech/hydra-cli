@@ -13,6 +13,8 @@ const UMFMessage = require('fwsp-umf-message');
 const version = require('./package.json').version;
 const redisPreKey = 'hydra:service';
 
+const ACTIVE_SERVICE = 15;
+
 class Program {
   constructor() {
     this.configData = null;
@@ -32,17 +34,17 @@ class Program {
     console.log('A command line interface for Hydra services');
     console.log('');
     console.log('Commands:');
-    console.log('  help                        - this help list');
-    console.log('  config                      - configure connection to redis');
-    console.log('  config list                 - display current configuration');
-    console.log('  health [serviceName]        - display service health');
-    console.log('  healthlog serviceName       - display service health log');
-    console.log('  message create              - create a message object');
-    console.log('  message send message.json   - send a message');
-    console.log('  nodes [serviceName]         - display service instance nodes');
-    console.log('  rest path [payload.json]    - make an HTTP RESTful call to a service');
-    console.log('  routes [serviceName]        - display service API routes');
-    console.log('  services [serviceName]      - display list of servers');
+    console.log('  help                         - this help list');
+    console.log('  config                       - configure connection to redis');
+    console.log('  config list                  - display current configuration');
+    console.log('  health [serviceName]         - display service health');
+    console.log('  healthlog serviceName        - display service health log');
+    console.log('  message create               - create a message object');
+    console.log('  message send message.json    - send a message');
+    console.log('  nodes [serviceName]          - display service instance nodes');
+    console.log('  rest path [payload.json]     - make an HTTP RESTful call to a service');
+    console.log('  routes [serviceName]         - display service API routes');
+    console.log('  services [serviceName]       - display list of services');
     console.log('');
   }
 
@@ -364,6 +366,13 @@ class Program {
         } else {
           serviceList = nodes;
         }
+        let newList = [];
+        serviceList.forEach((service) => {
+          if (service.elapsed < ACTIVE_SERVICE) {
+            newList.push(service);
+          }
+        });
+        serviceList = newList;
         this.displayJSON(serviceList);
         this.exitApp();
       });
