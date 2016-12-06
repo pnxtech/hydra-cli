@@ -13,7 +13,7 @@ const UMFMessage = require('fwsp-umf-message');
 const version = require('./package.json').version;
 const redisPreKey = 'hydra:service';
 
-const ACTIVE_SERVICE = 15;
+const ACTIVE_SERVICE = 5;
 
 class Program {
   constructor() {
