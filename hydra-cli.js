@@ -273,8 +273,9 @@ class Program {
     let entries = [];
     hydra.getServiceHealthAll()
       .then((services) => {
+        console.log('services', services);
         services.forEach((service) => {
-          if (serviceName && service.health[0].serviceName === serviceName) {
+          if (serviceName && service.health.length > 0 && service.health[0].serviceName === serviceName) {
             entries.push(service.health);
           }
           if (!serviceName) {
