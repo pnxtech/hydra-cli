@@ -1,6 +1,6 @@
 {
   "name": "hydra-cli",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "Hydra Commandline Interface",
   "author": "Carlos Justiniano <carlos.justiniano@gmail.com>",
   "keywords": [
