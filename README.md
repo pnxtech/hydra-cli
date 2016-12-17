@@ -1,4 +1,5 @@
 # hydra-cli
+[![npm version](https://badge.fury.io/js/hydra-cli.svg)](https://badge.fury.io/js/hydra-cli)
 Hydra command line interface for use with [Hydra](https://github.com/flywheelsports/fwsp-hydra) enabled microservices.
 
 ## install
