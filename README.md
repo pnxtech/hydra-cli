@@ -1,6 +1,6 @@
 # hydra-cli
 
-[![npm version](https://badge.fury.io/js/hydra-cli.svg)](https://badge.fury.io/js/hydra-cli) <span class="badge-npmdownloads"><a href="https://npmjs.org/package/hydra-cli" title="View this project on NPM"><img src="https://img.shields.io/npm/dm/hydra-cli.svg" alt="NPM downloads" /></a></span> [![npm](https://img.shields.io/npm/l/hydra-cli.svg)]() [![Join the chat at https://gitter.im/flywheelsports/fwsp-hydra](https://badges.gitter.im/flywheelsports/fwsp-hydra.svg)](https://gitter.im/flywheelsports/fwsp-hydra) 
+[![npm version](https://badge.fury.io/js/hydra-cli.svg)](https://badge.fury.io/js/hydra-cli) <span class="badge-npmdownloads"><a href="https://npmjs.org/package/hydra-cli" title="View this project on NPM"><img src="https://img.shields.io/npm/dm/hydra-cli.svg" alt="NPM downloads" /></a></span> [![npm](https://img.shields.io/npm/l/hydra-cli.svg)]() 
 
 Hydra command line interface for use with [Hydra](https://github.com/flywheelsports/fwsp-hydra) enabled microservices.
 
