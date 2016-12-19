@@ -7,6 +7,7 @@
     "hydra"
   ],
   "analyze": false,
+  "preferGlobal": true,
   "license": "MIT",
   "engines": {
     "node": ">=6.2.1"
