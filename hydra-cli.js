@@ -5,13 +5,11 @@ const fs = require('fs');
 const rl = require('readline');
 const Promise = require('bluebird');
 const moment = require('moment');
-const redis = require('redis');
 const hydra = require('fwsp-hydra');
 const Utils = require('fwsp-jsutils');
 const config = require('fwsp-config');
 const UMFMessage = require('fwsp-umf-message');
 const version = require('./package.json').version;
-const redisPreKey = 'hydra:service';
 
 const ACTIVE_SERVICE = 5;
 
@@ -19,7 +17,6 @@ class Program {
   constructor() {
     this.configData = null;
     this.hydraConfig = null;
-    this.redisdb = null;
   }
 
   /**
@@ -68,6 +65,9 @@ class Program {
       return;
     }
 
+    let command = process.argv[2];
+    let args = process.argv.slice(3);
+
     this.hydraConfig = `${this.getUserHome()}/.hydra-cli`;
     fs.readFile(this.hydraConfig, 'utf8', (err, data) => {
       if (!err) {
@@ -85,76 +85,77 @@ class Program {
               'db': this.configData.redisDb
             }
           };
-          hydra.init(conf);
+          hydra.init(conf)
+            .then(() => {
+              this.processCommand(command, args);
+              return 0;
+            })
+            .catch(err => console.log('err', err.message));
         } catch (e) {
           this.configData = null;
         }
-      }
-
-      let command = process.argv[2];
-      let args = process.argv.slice(3);
-
-      switch (command) {
-        case 'config':
-          this.handleConfigCommand(args);
-          break;
-        case 'health':
-          this.handleHealth(args);
-          break;
-        case 'healthlog':
-          this.handleHealthLog(args);
-          break;
-        case 'help':
-          this.displayHelp();
-          process.exit();
-          break;
-        case 'message':
-          switch (args[0]) {
-            case 'create':
-              this.handleMessageCreate(args);
-              break;
-            case 'send':
-              this.handleMessageSend(args);
-              break;
-            default:
-              console.log(`Unknown message options: ${args[0]}`);
-              this.exitApp();
-              break;
-          }
-          break;
-        case 'nodes':
-          this.handleNodesList(args);
-          break;
-        case 'rest':
-          this.handleRest(args);
-          break;
-        case 'routes':
-          this.handleRoutes(args);
-          break;
-        case 'services':
-          this.handleServices(args);
-          break;
-        default:
-          console.log(`Unknown command: ${command}`);
-          this.exitApp();
-          break;
       }
     });
   }
 
   /**
-  * @name redisConnect
-  * @description Connect to an instance of redis. This is the redis db that Hydra is using
-  * @return {object} promise - promise resolving
+  * @name processCommand
+  * @description process hydra-cli command
+  * @param {string} command - command string
+  * @param {array} args - array of command params
   */
-  redisConnect() {
-    return new Promise((resolve, reject) => {
-      let redisdb = redis.createClient(this.configData.redisPort, this.configData.redisUrl);
-      redisdb.select(this.configData.redisDb, (err, result) => {
-        this.redisdb = redisdb;
-        resolve();
-      });
-    });
+  processCommand(command, args) {
+    if (!this.configData && command !== 'config') {
+      console.log('Warning, hydra-cli is not configured.');
+      console.log('Setup hydra-cli config command.');
+      return;
+    }
+
+    switch (command) {
+      case 'config':
+        this.handleConfigCommand(args);
+        break;
+      case 'health':
+        this.handleHealth(args);
+        break;
+      case 'healthlog':
+        this.handleHealthLog(args);
+        break;
+      case 'help':
+        this.displayHelp();
+        process.exit();
+        break;
+      case 'message':
+        switch (args[0]) {
+          case 'create':
+            this.handleMessageCreate(args);
+            break;
+          case 'send':
+            this.handleMessageSend(args);
+            break;
+          default:
+            console.log(`Unknown message options: ${args[0]}`);
+            this.exitApp();
+            break;
+        }
+        break;
+      case 'nodes':
+        this.handleNodesList(args);
+        break;
+      case 'rest':
+        this.handleRest(args);
+        break;
+      case 'routes':
+        this.handleRoutes(args);
+        break;
+      case 'services':
+        this.handleServices(args);
+        break;
+      default:
+        console.log(`Unknown command: ${command}`);
+        this.exitApp();
+        break;
+    }
   }
 
   /**
@@ -164,50 +165,9 @@ class Program {
   exitApp() {
     setTimeout(() => {
       hydra.shutdown();
-      if (this.redisdb) {
-        this.redisdb.quit();
-      }
       console.log(' ');
       process.exit();
     }, 250);
-  }
-
-  /**
-  * @name getKeys
-  * @summary Retrieves a list of redis keys based on pattern.
-  * @param {string} pattern - pattern to filter with
-  * @return {object} promise - promise resolving to array of keys or or empty array
-  */
-  getKeys(pattern) {
-    return new Promise((resolve, reject) => {
-      this.redisdb.keys(pattern, (err, result) => {
-        if (err) {
-          resolve([]);
-        } else {
-          resolve(result);
-        }
-      });
-    });
-  }
-
-  /**
-  * @name getRoutes
-  * @summary Retrieves a array list of routes
-  * @param {string} serviceName - name of service to retreieve list of routes.
-  *                 If param is undefined, then the current serviceName is used.
-  * @return {object} Promise - resolving to array of routes or rejection
-  */
-  getRoutes(serviceName) {
-    return new Promise((resolve, reject) => {
-      let routesKey = `${redisPreKey}:${serviceName}:service:routes`;
-      this.redisdb.smembers(routesKey, (err, result) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(result);
-        }
-      });
-    });
   }
 
   /**
@@ -254,7 +214,7 @@ class Program {
           data.redisDb = redisDb;
           fs.writeFile(this.hydraConfig, JSON.stringify(data), (err) => {
             if (err) {
-              console.log(err);
+              console.log(err.message);
             }
             process.exit();
           });
@@ -375,7 +335,8 @@ class Program {
         serviceList = newList;
         this.displayJSON(serviceList);
         this.exitApp();
-      });
+      })
+      .catch(err => console.log(err));
   }
 
   /**
@@ -411,13 +372,12 @@ class Program {
               this.exitApp();
             })
             .catch((err) => {
-              console.log('err', err);
+              console.log(err.message);
               this.exitApp();
             });
           return null;
         })
         .catch((err) => {
-          console.log('err', err);
           console.log(`Unable to open ${args[1]}`);
           this.exitApp();
         });
@@ -433,7 +393,7 @@ class Program {
           this.exitApp();
         })
         .catch((err) => {
-          console.log('err', err);
+          console.log(err.message);
           this.exitApp();
         });
       return null;
@@ -457,7 +417,8 @@ class Program {
         }
         this.displayJSON(routes);
         this.exitApp();
-      });
+      })
+      .catch(err => console.log(err.message));
   }
 
   /**
@@ -481,7 +442,8 @@ class Program {
         }
         this.displayJSON(serviceList);
         this.exitApp();
-      });
+      })
+      .catch(err => console.log(err.message));
   }
 }
 
