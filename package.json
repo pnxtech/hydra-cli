@@ -1,6 +1,6 @@
 {
   "name": "hydra-cli",
-  "version": "0.4.0",
+  "version": "0.4.2",
   "description": "Hydra Commandline Interface",
   "author": "Carlos Justiniano <carlos.justiniano@gmail.com>",
   "keywords": [
@@ -19,6 +19,9 @@
     "fwsp-jsutils": "1.0.8",
     "fwsp-umf-message": "0.4.3",
     "moment": "2.17.1"
+  },
+  "devDependencies": {
+    "eslint": "3.12.2"
   },
   "bin": {
     "hydra-cli": "hydra-cli.js"

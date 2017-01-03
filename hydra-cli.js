@@ -90,10 +90,18 @@ class Program {
               this.processCommand(command, args);
               return 0;
             })
-            .catch(err => console.log('err', err.message));
-        } catch (e) {
+            .catch((err) => {
+              console.log('err', err.message);
+              this.configData = null;
+            });
+        } catch (err) {
+          console.log('err', err.message);
           this.configData = null;
+          this.processCommand(command, args);          
         }
+      } else {
+        this.configData = null;
+        this.processCommand(command, args);
       }
     });
   }
