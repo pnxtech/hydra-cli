@@ -1,6 +1,6 @@
 # hydra-cli
 
-[![npm version](https://badge.fury.io/js/hydra-cli.svg)](https://badge.fury.io/js/hydra-cli) <span class="badge-npmdownloads"><a href="https://npmjs.org/package/hydra-cli" title="View this project on NPM"><img src="https://img.shields.io/npm/dm/hydra-cli.svg" alt="NPM downloads" /></a></span> [![npm](https://img.shields.io/npm/l/hydra-cli.svg)]() 
+[![npm version](https://badge.fury.io/js/hydra-cli.svg)](https://badge.fury.io/js/hydra-cli) <span class="badge-npmdownloads"><a href="https://npmjs.org/package/hydra-cli" title="View this project on NPM"><img src="https://img.shields.io/npm/dm/hydra-cli.svg" alt="NPM downloads" /></a></span> [![npm](https://img.shields.io/npm/l/hydra-cli.svg)]()
 
 Hydra command line interface for use with [Hydra](https://github.com/flywheelsports/fwsp-hydra) enabled microservices.
 
@@ -14,7 +14,7 @@ $ [sudo] npm install -g hydra-cli
 
 ```
 $ hydra-cli
-hydra-cli version 0.3.2
+hydra-cli version 0.5.0
 Usage: hydra-cli command [parameters]
 See docs at: https://github.com/flywheelsports/hydra-cli
 
@@ -22,8 +22,9 @@ A command line interface for Hydra services
 
 Commands:
   help                         - this help list
-  config                       - configure connection to redis
+  config instanceName          - configure connection to redis
   config list                  - display current configuration
+  use instanceName             - specify which redis instance to use
   health [serviceName]         - display service health
   healthlog serviceName        - display service health log
   message create               - create a message object
@@ -46,11 +47,12 @@ $ hydra-cli help
 ## config
 
 Hydra-cli requires that you first point it to the instance of Redis which your microservices are using.
+You must name the instance you're configuring.
 
-> syntax: hydra-cli config
+> syntax: hydra-cli config instanceName
 
 ```shell
-$ hydra-cli config
+$ hydra-cli config local
 redisUrl: 127.0.0.1
 redisPort: 6379
 redisDb: 15
@@ -64,11 +66,20 @@ Lists your config settings.
 ```javascript
 $ hydra-cli config list
 {
-  "version": "1.0",
-  "redisUrl": "127.0.0.1",
-  "redisPort": "6379",
-  "redisDb": "15"
+  "version": 2,
+  "local": {
+    "redisUrl": "127.0.0.1",
+    "redisPort": "6379",
+    "redisDb": "15"
+  }
 }
+```
+
+## use
+Specify which redis instance to use.
+
+```javascript
+$ hydra-cli use local
 ```
 
 ## health
