@@ -25,7 +25,7 @@
     "no-extra-semi": 2,
     "no-constant-condition": 2,
     "no-alert": 2,
-    "one-var-declaration-per-line": 2,
+    "one-var-declaration-per-line": [2, "always"],
     "operator-linebreak": [
       2,
       "after"
@@ -65,6 +65,7 @@
         "initialized": "never"
       }
     ],
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
     "keyword-spacing": [
       2,
       {}
@@ -93,7 +94,8 @@
     "browser": true,
     "node": true,
     "es6": true,
-    "jasmine": true
+    "jasmine": true,
+    "mocha": true
   },
   "globals": {
     "-": 0

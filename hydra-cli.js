@@ -3,8 +3,6 @@
 
 const fs = require('fs');
 const rl = require('readline');
-const Promise = require('bluebird');
-const moment = require('moment');
 const hydra = require('fwsp-hydra');
 const Utils = require('fwsp-jsutils');
 const config = require('fwsp-config');
@@ -12,16 +10,19 @@ const UMFMessage = require('fwsp-umf-message');
 const version = require('./package.json').version;
 
 const ACTIVE_SERVICE = 5;
+const CONFIG_FILE_VERSION = 2;
 
 class Program {
   constructor() {
     this.configData = null;
+    this.configName = '';
     this.hydraConfig = null;
   }
 
   /**
   * @name displayHelp
   * @description Display program help info
+  * @return {undefined}
   */
   displayHelp() {
     console.log(`hydra-cli version ${version}`);
@@ -32,8 +33,9 @@ class Program {
     console.log('');
     console.log('Commands:');
     console.log('  help                         - this help list');
-    console.log('  config                       - configure connection to redis');
+    console.log('  config instanceName          - configure connection to redis');
     console.log('  config list                  - display current configuration');
+    console.log('  use instanceName             - name of redis insance to use');
     console.log('  health [serviceName]         - display service health');
     console.log('  healthlog serviceName        - display service health log');
     console.log('  message create               - create a message object');
@@ -57,6 +59,7 @@ class Program {
   /**
   * @name main
   * @description entry point for command dispatch processing
+  * @return {undefined}
   */
   main() {
     if (process.argv.length < 3) {
@@ -73,6 +76,15 @@ class Program {
       if (!err) {
         try {
           this.configData = JSON.parse(data);
+          if (!this.configData.version) {
+            this.configData = {
+              version: CONFIG_FILE_VERSION
+            };
+          }
+          if (command === 'use') {
+            this.processCommand(command, args);
+            return;
+          }
           let conf = {
             'serviceName': 'hydra-cli',
             'serviceDescription': 'Not a service',
@@ -80,9 +92,9 @@ class Program {
             'servicePort': 0,
             'serviceType': 'non',
             'redis': {
-              'url': this.configData.redisUrl,
-              'port': this.configData.redisPort,
-              'db': this.configData.redisDb
+              'url': this.configData.redisUrl || '',
+              'port': this.configData.redisPort || 0,
+              'db': this.configData.redisDb || 0
             }
           };
           hydra.init(conf)
@@ -97,7 +109,7 @@ class Program {
         } catch (err) {
           console.log('err', err.message);
           this.configData = null;
-          this.processCommand(command, args);          
+          this.processCommand(command, args);
         }
       } else {
         this.configData = null;
@@ -111,17 +123,21 @@ class Program {
   * @description process hydra-cli command
   * @param {string} command - command string
   * @param {array} args - array of command params
+  * @return {undefined}
   */
   processCommand(command, args) {
-    if (!this.configData && command !== 'config') {
+    if (!this.configData && command !== 'use' && command !== 'config') {
       console.log('Warning, hydra-cli is not configured.');
-      console.log('Setup hydra-cli config command.');
+      console.log('Use the hydra-cli config command.');
       return;
     }
 
     switch (command) {
       case 'config':
         this.handleConfigCommand(args);
+        break;
+      case 'use':
+        this.handleUseCommand(args);
         break;
       case 'health':
         this.handleHealth(args);
@@ -169,6 +185,7 @@ class Program {
   /**
   * @name exitApp
   * @description properly exit this app
+  * @return {undefined}
   */
   exitApp() {
     setTimeout(() => {
@@ -182,6 +199,7 @@ class Program {
   * @name displayJSON
   * @description pretty print json
   * @param {string} json - stringified json
+  * @return {undefined}
   */
   displayJSON(json) {
     if (typeof json === 'string') {
@@ -205,21 +223,38 @@ class Program {
   * @name handleConfigCommand
   * @description handle the creation of the app config DOT file.
   * @param {array} args - program arguments
+  * @return {undefined}
   */
   handleConfigCommand(args) {
-    if (args.length === 1 && args[0] === 'list')  {
+    if (args.length === 1 && args[0] === 'list') {
       console.log(JSON.stringify(this.configData, null, 2));
       process.exit();
       return;
+    } else if (args.length !== 1) {
+      console.log('An instance name is required.');
+      process.exit();
+      return;
     }
+
+    this.configName = args[0];
+
     let prompts = rl.createInterface(process.stdin, process.stdout);
     prompts.question('redisUrl: ', (redisUrl) => {
       prompts.question('redisPort: ', (redisPort) => {
         prompts.question('redisDb: ', (redisDb) => {
-          let data = this.configData || {};
-          data.redisUrl = redisUrl;
-          data.redisPort = redisPort;
-          data.redisDb = redisDb;
+          let data = this.configData || {
+            version: CONFIG_FILE_VERSION
+          };
+          Object.assign(data, {
+            redisUrl,
+            redisPort,
+            redisDb,
+            [this.configName]: {
+              redisUrl,
+              redisPort,
+              redisDb
+            }
+          });
           fs.writeFile(this.hydraConfig, JSON.stringify(data), (err) => {
             if (err) {
               console.log(err.message);
@@ -232,9 +267,38 @@ class Program {
   }
 
   /**
+  * @name handleUseCommand
+  * @description handle the switching of configs
+  * @param {array} args - program arguments
+  * @return {undefined}
+  */
+  handleUseCommand(args) {
+    if (args.length !== 1) {
+      console.log('An instance name is required.');
+      process.exit();
+      return;
+    }
+    this.configName = args[0];
+    if (!this.configData[this.configName]) {
+      console.log('Instance name not found, create with hydra-cli config instanceName command.');
+      process.exit();
+      return;
+    }
+
+    this.configData = Object.assign(this.configData, this.configData[this.configName]);
+    fs.writeFile(this.hydraConfig, JSON.stringify(this.configData), (err) => {
+      if (err) {
+        console.log(err.message);
+      }
+      process.exit();
+    });
+  }
+
+  /**
   * @name handleHealth
   * @description display service health
   * @param {array} args - program arguments
+  * @return {undefined}
   */
   handleHealth(args) {
     let serviceName = args[0];
@@ -258,6 +322,7 @@ class Program {
   * @name handleHealthLog
   * @description display service health log
   * @param {array} args - program arguments
+  * @return {undefined}
   */
   handleHealthLog(args) {
     let serviceName = args[0];
@@ -280,9 +345,10 @@ class Program {
   /**
   * @name handleMessageCreate
   * @description Display a new message
-  * @param {array} args - program arguments
+  * @param {array} _args - program arguments
+  * @return {undefined}
   */
-  handleMessageCreate(args) {
+  handleMessageCreate(_args) {
     let msg = UMFMessage.createMessage({
       to: '{serviceName here}:/',
       from: 'hydra-cli:/',
@@ -296,6 +362,7 @@ class Program {
   * @name handleMessageSend
   * @description Send message
   * @param {array} args - program arguments
+  * @return {undefined}
   */
   handleMessageSend(args) {
     if (args.length !== 2) {
@@ -319,6 +386,7 @@ class Program {
   * @name handleNodesList
   * @description handle the display of service nodes.
   * @param {array} args - program arguments
+  * @return {undefined}
   */
   handleNodesList(args) {
     hydra.getServiceNodes()
@@ -385,7 +453,7 @@ class Program {
             });
           return null;
         })
-        .catch((err) => {
+        .catch((_err) => {
           console.log(`Unable to open ${args[1]}`);
           this.exitApp();
         });
@@ -412,15 +480,15 @@ class Program {
   * @name handleRoutes
   * @description handle the display of service routes
   * @param {array} args - program arguments
+  * @return {undefined}
   */
   handleRoutes(args) {
-    let routeList = [];
     hydra.getAllServiceRoutes()
       .then((routes) => {
         let serviceName = args[0];
         if (serviceName) {
           routes = {
-            serviceName : routes[serviceName]
+            serviceName: routes[serviceName]
           };
         }
         this.displayJSON(routes);
@@ -433,6 +501,7 @@ class Program {
   * @name handleServices
   * @description display list of services
   * @param {array} args - program arguments
+  * @return {undefined}
   */
   handleServices(args) {
     hydra.getServices()
