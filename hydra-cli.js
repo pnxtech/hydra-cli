@@ -81,7 +81,7 @@ class Program {
               version: CONFIG_FILE_VERSION
             };
           }
-          if (command === 'use') {
+          if (command === 'use' || command === 'config') {
             this.processCommand(command, args);
             return;
           }
@@ -97,6 +97,14 @@ class Program {
               'db': this.configData.redisDb || 0
             }
           };
+
+          let tid = setTimeout(() => {
+            console.log('Unable to connect to Redis. Use "hydra-cli config list" or "hydra-cli use instanceName" to switch to another instance.');
+            clearTimeout(tid);
+            process.exit();
+            return;
+          }, 5000);
+
           hydra.init(conf)
             .then(() => {
               this.processCommand(command, args);
