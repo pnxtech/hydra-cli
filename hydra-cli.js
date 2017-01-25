@@ -35,7 +35,7 @@ class Program {
     console.log('  help                         - this help list');
     console.log('  config instanceName          - configure connection to redis');
     console.log('  config list                  - display current configuration');
-    console.log('  use instanceName             - name of redis insance to use');
+    console.log('  use instanceName             - name of redis instance to use');
     console.log('  health [serviceName]         - display service health');
     console.log('  healthlog serviceName        - display service health log');
     console.log('  message create               - create a message object');
