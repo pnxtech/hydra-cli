@@ -33,6 +33,8 @@ class Program {
     console.log('');
     console.log('Commands:');
     console.log('  help                         - this help list');
+    console.log('  cfg pull label               - download configuration file');
+    console.log('  cfg push label filename      - update configuration file');
     console.log('  config instanceName          - configure connection to redis');
     console.log('  config list                  - display current configuration');
     console.log('  use instanceName             - name of redis instance to use');
@@ -141,6 +143,9 @@ class Program {
     }
 
     switch (command) {
+      case 'cfg':
+        this.handleCfgCommand(args);
+        break;
       case 'config':
         this.handleConfigCommand(args);
         break;
@@ -226,6 +231,51 @@ class Program {
   /* ************************************************************************* */
   /* ************************************************************************* */
   /* ************************************************************************* */
+
+  /**
+  * @name handleCfgCommand
+  * @description handle service config files
+  * @param {array} args - program arguments
+  * @return {undefined}
+  */
+  handleCfgCommand(args) {
+    if (!args[0]) {
+      console.log('requires "push" or "pull" options');
+      this.exitApp();
+    }
+    if (args[0] === 'push') {
+      if (args.length != 3) {
+        console.log('cfg push requires a label and config filename');
+        this.exitApp();
+      }
+      fs.readFile(args[2], 'utf8', (err, data) => {
+        if (!err) {
+          let strMessage = Utils.safeJSONParse(data);
+          hydra.putConfig(args[1], strMessage)
+            .then(() => {
+              this.exitApp();
+            })
+            .catch((err) => {
+              console.log(err.message);
+              this.exitApp();
+            });
+        } else {
+          console.log(`cfg push can't open file ${args[2]}`);
+          this.exitApp();
+        }
+      });
+    } else if (args[0] === 'pull') {
+      hydra.getConfig(args[1])
+        .then((result) => {
+          this.displayJSON(result);
+          this.exitApp();
+        })
+        .catch((err) => {
+          console.log(err.message);
+          this.exitApp();
+        });
+    }
+  }
 
   /**
   * @name handleConfigCommand

@@ -14,7 +14,7 @@ $ [sudo] npm install -g hydra-cli
 
 ```
 $ hydra-cli
-hydra-cli version 0.5.2
+hydra-cli version 0.5.4
 Usage: hydra-cli command [parameters]
 See docs at: https://github.com/flywheelsports/hydra-cli
 
@@ -22,6 +22,8 @@ A command line interface for Hydra services
 
 Commands:
   help                         - this help list
+  cfg pull label               - download configuration file  
+  cfg push label filename      - update configuration file
   config instanceName          - configure connection to redis
   config list                  - display current configuration
   use instanceName             - specify which redis instance to use
@@ -32,7 +34,7 @@ Commands:
   nodes [serviceName]          - display service instance nodes
   rest path [payload.json]     - make an HTTP RESTful call to a service
   routes [serviceName]         - display service API routes
-  services [serviceName]       - display list of registered services
+  services [serviceName]       - display list of registered services  
 ```
 
 ## help
@@ -43,6 +45,24 @@ Lists the help screen above.
 ```shell
 $ hydra-cli help
 ```
+
+## cfg
+
+Hydra-cli allows you to push and pull configurations for your microservices.
+
+In this example we're pushing the config.json file from the local directory and storing it in Redis under the myservice:0.0.1 key. This allows the myservice service to pull it's 0.0.1 configuration during startup.
+
+```shell
+$ hydra-cli cfg push myservice:0.0.1 config.json
+```
+
+We can download the configuration file for the myservice using:
+
+```shell
+$ hydra-cli cfg pull myservice:0.0.1 > config.json
+```
+
+Because the `cfg pull` command outputs the contents to screen you'll need to use the standard out redirection to copy the output to a file.
 
 ## config
 
