@@ -9,7 +9,6 @@ const config = require('fwsp-config');
 const UMFMessage = require('fwsp-umf-message');
 const version = require('./package.json').version;
 
-const ACTIVE_SERVICE = 5;
 const CONFIG_FILE_VERSION = 2;
 
 class Program {
@@ -43,6 +42,7 @@ class Program {
     console.log('  message create               - create a message object');
     console.log('  message send message.json    - send a message');
     console.log('  nodes [serviceName]          - display service instance nodes');
+    console.log('  refresh node list            - refresh list of nodes');
     console.log('  rest path [payload.json]     - make an HTTP RESTful call to a service');
     console.log('  routes [serviceName]         - display service API routes');
     console.log('  services [serviceName]       - display list of services');
@@ -88,15 +88,17 @@ class Program {
             return;
           }
           let conf = {
-            'serviceName': 'hydra-cli',
-            'serviceDescription': 'Not a service',
-            'serviceIP': '',
-            'servicePort': 0,
-            'serviceType': 'non',
-            'redis': {
-              'url': this.configData.redisUrl || '',
-              'port': this.configData.redisPort || 0,
-              'db': this.configData.redisDb || 0
+            'hydra': {
+              'serviceName': 'hydra-cli',
+              'serviceDescription': 'Not a service',
+              'serviceIP': '',
+              'servicePort': 0,
+              'serviceType': 'non',
+              'redis': {
+                'url': this.configData.redisUrl || '',
+                'port': this.configData.redisPort || 0,
+                'db': this.configData.redisDb || 0
+              }
             }
           };
 
@@ -178,6 +180,9 @@ class Program {
         break;
       case 'nodes':
         this.handleNodesList(args);
+        break;
+      case 'refresh':
+        this.handleRefresh(args);
         break;
       case 'rest':
         this.handleRest(args);
@@ -460,13 +465,6 @@ class Program {
         } else {
           serviceList = nodes;
         }
-        let newList = [];
-        serviceList.forEach((service) => {
-          if (service.elapsed < ACTIVE_SERVICE) {
-            newList.push(service);
-          }
-        });
-        serviceList = newList;
         this.displayJSON(serviceList);
         this.exitApp();
       })
@@ -579,6 +577,19 @@ class Program {
         this.exitApp();
       })
       .catch(err => console.log(err.message));
+  }
+
+  /**
+  * @name handleRefresh
+  * @description refresh list of nodes
+  * @param {array} _args - program arguments
+  * @return {undefined}
+  */
+  handleRefresh(_args) {
+    let redisClient = hydra.getClonedRedisClient();
+    redisClient.expire('hydra:service:nodes', 0);
+    redisClient.quit();
+    this.exitApp();
   }
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "hydra-cli",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "Hydra Commandline Interface",
   "author": "Carlos Justiniano <carlos.justiniano@gmail.com>",
   "keywords": [
@@ -14,15 +14,14 @@
   },
   "dependencies": {
     "bluebird": "3.5.0",
-    "fwsp-config": "1.1.1",
-    "fwsp-hydra": "0.15.2",
+    "fwsp-config": "1.1.2",
+    "fwsp-hydra": "0.15.14",
     "fwsp-jsutils": "1.0.9",
-    "fwsp-umf-message": "0.4.3",
-    "moment": "2.17.1"
+    "fwsp-umf-message": "0.4.3"
   },
   "devDependencies": {
-    "eslint": "3.17.1",
- 		"eslint-plugin-jasmine": "2.2.0"
+    "eslint": "3.18.0",
+    "eslint-plugin-jasmine": "2.2.0"
   },
   "bin": {
     "hydra-cli": "hydra-cli.js"
