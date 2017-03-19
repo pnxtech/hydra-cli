@@ -349,5 +349,6 @@ $ hydra-cli services
 Display command used to open a redis shell using redis-cli. On *nix machines you can use the following to quickly open a redis shell:
 
 ```shell
-$(hydra-cli shell)
+$ $(hydra-cli shell)
+52.3.229.252:6379[15]>
 ```
