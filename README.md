@@ -35,7 +35,8 @@ Commands:
   refresh node list            - refresh list of nodes  
   rest path [payload.json]     - make an HTTP RESTful call to a service
   routes [serviceName]         - display service API routes
-  services [serviceName]       - display list of registered services  
+  services [serviceName]       - display list of registered services
+  shell                        - display command to open redis shell  
 ```
 
 ## help
@@ -341,4 +342,12 @@ $ hydra-cli services
     "registeredOn": "2016-11-22T19:31:27.853Z"
   }
 ]
+```
+
+## shell
+
+Display command used to open a redis shell using redis-cli. On *nix machines you can use the following to quickly open a redis shell:
+
+```shell
+$(hydra-cli shell)
 ```

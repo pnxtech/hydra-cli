@@ -46,6 +46,7 @@ class Program {
     console.log('  rest path [payload.json]     - make an HTTP RESTful call to a service');
     console.log('  routes [serviceName]         - display service API routes');
     console.log('  services [serviceName]       - display list of services');
+    console.log('  shell                        - display command to open redis shell');
     console.log('');
   }
 
@@ -192,6 +193,9 @@ class Program {
         break;
       case 'services':
         this.handleServices(args);
+        break;
+      case 'shell':
+        this.handleShell();
         break;
       default:
         console.log(`Unknown command: ${command}`);
@@ -589,6 +593,16 @@ class Program {
     let redisClient = hydra.getClonedRedisClient();
     redisClient.expire('hydra:service:nodes', 0);
     redisClient.quit();
+    this.exitApp();
+  }
+
+  /**
+  * @name handleShell
+  * @summary displays the command used to open a redis shell for the currently selected instance
+  * @return {undefined}
+  */
+  handleShell() {
+    console.log(`redis-cli -h ${this.configData.redisUrl} -p ${this.configData.redisPort} -n ${this.configData.redisDb}`);
     this.exitApp();
   }
 }
