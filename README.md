@@ -14,7 +14,7 @@ $ [sudo] npm install -g hydra-cli
 
 ```
 $ hydra-cli
-hydra-cli version 0.5.4
+hydra-cli version 0.5.5
 Usage: hydra-cli command [parameters]
 See docs at: https://github.com/flywheelsports/hydra-cli
 
@@ -32,6 +32,7 @@ Commands:
   message create               - create a message object
   message send message.json    - send a message
   nodes [serviceName]          - display service instance nodes
+  refresh node list            - refresh list of nodes  
   rest path [payload.json]     - make an HTTP RESTful call to a service
   routes [serviceName]         - display service API routes
   services [serviceName]       - display list of registered services  
@@ -233,6 +234,13 @@ $ hydra-cli nodes
     "elapsed": 4
   }
 ]
+```
+
+## refresh
+Refresh clears dead services from the nodes list.  Use this when `hydra-cli nodes` returns nodes which have expired.
+
+```javascript
+$ hydra-cli refresh node list
 ```
 
 ## rest
