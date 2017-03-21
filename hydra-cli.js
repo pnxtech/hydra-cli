@@ -34,6 +34,7 @@ class Program {
     console.log('  help                         - this help list');
     console.log('  cfg pull label               - download configuration file');
     console.log('  cfg push label filename      - update configuration file');
+    console.log('  cfg list serviceName         - display a list of config versions');
     console.log('  config instanceName          - configure connection to redis');
     console.log('  config list                  - display current configuration');
     console.log('  use instanceName             - name of redis instance to use');
@@ -212,7 +213,6 @@ class Program {
   exitApp() {
     setTimeout(() => {
       hydra.shutdown();
-      console.log(' ');
       process.exit();
     }, 250);
   }
@@ -252,6 +252,7 @@ class Program {
       console.log('requires "push" or "pull" options');
       this.exitApp();
     }
+
     if (args[0] === 'push') {
       if (args.length != 3) {
         console.log('cfg push requires a label and config filename');
@@ -273,7 +274,9 @@ class Program {
           this.exitApp();
         }
       });
-    } else if (args[0] === 'pull') {
+    }
+
+    if (args[0] === 'pull') {
       hydra.getConfig(args[1])
         .then((result) => {
           this.displayJSON(result);
@@ -284,6 +287,21 @@ class Program {
           this.exitApp();
         });
     }
+
+    if (args[0] === 'list') {
+      hydra.listConfig(args[1])
+        .then((result) => {
+          result.forEach((item) => {
+            console.log(item);
+          });
+          this.exitApp();
+        })
+        .catch((err) => {
+          console.log(err.message);
+          this.exitApp();
+        });
+    }
+
   }
 
   /**

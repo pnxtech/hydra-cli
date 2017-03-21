@@ -14,7 +14,7 @@ $ [sudo] npm install -g hydra-cli
 
 ```
 $ hydra-cli
-hydra-cli version 0.5.5
+hydra-cli version 0.5.7
 Usage: hydra-cli command [parameters]
 See docs at: https://github.com/flywheelsports/hydra-cli
 
@@ -24,6 +24,7 @@ Commands:
   help                         - this help list
   cfg pull label               - download configuration file  
   cfg push label filename      - update configuration file
+  cfg list serviceName         - display a list of config versions
   config instanceName          - configure connection to redis
   config list                  - display current configuration
   use instanceName             - specify which redis instance to use
@@ -65,6 +66,12 @@ $ hydra-cli cfg pull myservice:0.0.1 > config.json
 ```
 
 Because the `cfg pull` command outputs the contents to screen you'll need to use the standard out redirection to copy the output to a file.
+
+You can retrieve a list of config versions for a given service using:
+
+```shell
+$ hydra-cli cfg list myservice
+```
 
 ## config
 
