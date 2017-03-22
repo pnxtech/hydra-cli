@@ -53,7 +53,7 @@ $ hydra-cli help
 
 Hydra-cli allows you to push and pull configurations for your microservices.
 
-In this example we're pushing the config.json file from the local directory and storing it in Redis under the myservice:0.0.1 key. This allows the myservice service to pull it's 0.0.1 configuration during startup.
+In this example we're pushing the config.json file from the local directory and storing it in Redis under the myservice:0.0.1 key. This allows the `myservice` service to pull its 0.0.1 configuration during startup.
 
 ```shell
 $ hydra-cli cfg push myservice:0.0.1 config.json
