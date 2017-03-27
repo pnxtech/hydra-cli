@@ -14,7 +14,7 @@ $ [sudo] npm install -g hydra-cli
 
 ```
 $ hydra-cli
-hydra-cli version 0.5.7
+hydra-cli version 1.0.0
 Usage: hydra-cli command [parameters]
 See docs at: https://github.com/flywheelsports/hydra-cli
 
