@@ -3,7 +3,7 @@
 
 const fs = require('fs');
 const rl = require('readline');
-const hydra = require('fwsp-hydra');
+const hydra = require('hydra');
 const Utils = require('fwsp-jsutils');
 const config = require('fwsp-config');
 const UMFMessage = require('fwsp-umf-message');
