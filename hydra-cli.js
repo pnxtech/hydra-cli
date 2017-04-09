@@ -608,10 +608,26 @@ class Program {
   * @return {undefined}
   */
   handleRefresh(_args) {
-    let redisClient = hydra.getClonedRedisClient();
-    redisClient.expire('hydra:service:nodes', 0);
-    redisClient.quit();
-    this.exitApp();
+    hydra.getServiceNodes()
+      .then((nodes) => {
+        let ids = [];
+        nodes.forEach((node) => {
+          if (node.elapsed > 60) {
+            ids.push(node.instanceID);
+          }
+        });
+        if (ids.length) {
+          let redisClient = hydra.getClonedRedisClient();
+          redisClient.hdel('hydra:service:nodes', ids);
+          redisClient.quit();
+        }
+        console.log(`${ids.length} entries removed`);
+        this.exitApp();
+      })
+      .catch(err => {
+        console.log(err);
+        this.exitApp();
+      });
   }
 
   /**
