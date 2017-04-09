@@ -2,7 +2,7 @@
 
 [![npm version](https://badge.fury.io/js/hydra-cli.svg)](https://badge.fury.io/js/hydra-cli) <span class="badge-npmdownloads"><a href="https://npmjs.org/package/hydra-cli" title="View this project on NPM"><img src="https://img.shields.io/npm/dm/hydra-cli.svg" alt="NPM downloads" /></a></span> [![npm](https://img.shields.io/npm/l/hydra-cli.svg)]()
 
-Hydra command line interface for use with [Hydra](https://github.com/flywheelsports/fwsp-hydra) enabled microservices.
+Hydra command line interface for use with [Hydra](https://github.com/flywheelsports/hydra) enabled microservices.
 
 ## install
 
@@ -14,7 +14,7 @@ $ [sudo] npm install -g hydra-cli
 
 ```
 $ hydra-cli
-hydra-cli version 1.0.0
+hydra-cli version 1.1.0
 Usage: hydra-cli command [parameters]
 See docs at: https://github.com/flywheelsports/hydra-cli
 
