@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 'use strict';
 
+const version = require('./package.json').version;
+
 const fs = require('fs');
 const rl = require('readline');
 const hydra = require('hydra');
 const Utils = require('fwsp-jsutils');
 const config = require('fwsp-config');
 const UMFMessage = require('fwsp-umf-message');
-const version = require('./package.json').version;
 
 const CONFIG_FILE_VERSION = 2;
 
