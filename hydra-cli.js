@@ -519,10 +519,15 @@ class Program {
           let msg = UMFMessage.createMessage({
             to: `${args[0]}`,
             from: 'hydra-cli:/',
+            headers: {
+              'content-type': 'application/json'
+            },
             body: config.getObject() || {}
           });
           hydra.makeAPIRequest(msg)
             .then((res) => {
+              res.result = res.payLoad.toString('utf8');
+              delete res.payLoad;
               this.displayJSON(res);
               this.exitApp();
             })
@@ -544,6 +549,8 @@ class Program {
       });
       hydra.makeAPIRequest(msg)
         .then((res) => {
+          res.result = res.payLoad.toString('utf8');
+          delete res.payLoad;
           this.displayJSON(res);
           this.exitApp();
         })
