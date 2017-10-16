@@ -14,7 +14,7 @@ $ [sudo] npm install -g hydra-cli
 
 ```
 $ hydra-cli
-hydra-cli version 1.3.5
+hydra-cli version 1.4.8
 Usage: hydra-cli command [parameters]
 See docs at: https://github.com/flywheelsports/hydra-cli
 
@@ -22,7 +22,7 @@ A command line interface for Hydra services
 
 Commands:
   help                         - this help list
-  cfg pull label               - download configuration file  
+  cfg pull label               - download configuration file
   cfg push label filename      - update configuration file
   cfg list serviceName         - display a list of config versions
   config instanceName          - configure connection to redis
@@ -33,11 +33,11 @@ Commands:
   message create               - create a message object
   message send message.json    - send a message
   nodes [serviceName]          - display service instance nodes
-  refresh node list            - refresh list of nodes  
+  refresh node list            - refresh list of nodes
   rest path [payload.json]     - make an HTTP RESTful call to a service
   routes [serviceName]         - display service API routes
   services [serviceName]       - display list of registered services
-  shell                        - display command to open redis shell  
+  shell                        - display command to open redis shell
 ```
 
 ## help
@@ -258,7 +258,7 @@ The `rest` command allows you to make a RESTful API call to a service which expo
 
 > payload is a file containing JSON which you wish to send with POST and PUT calls.
 
-Note the use of the path `hello-service:[get]/` below. This format is required.  
+Note the use of the path `hello-service:[get]/` below. This format is required.
 The full format is: `{serviceID}@{serviceName}:{HTTP method get/post/put/delete etc...}{API path}
 
 This is an example of how you would call an API endpoint on a specific service instance:
@@ -326,7 +326,7 @@ $ hydra-cli routes
 
 ## services
 
-Display a list of registered services.  
+Display a list of registered services.
 
 > syntax: hydra-cli services
 
