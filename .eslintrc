@@ -1,6 +1,6 @@
 {
-  "plugins": ["jasmine"],
-  "extends": ["eslint:recommended", "plugin:jasmine/recommended"],
+  "plugins": ["mocha"],
+  "extends": ["eslint:recommended", "google"],
   "parserOptions": {
     "ecmaVersion": 6,
     "ecmaFeatures": {
@@ -94,10 +94,13 @@
     "browser": true,
     "node": true,
     "es6": true,
-    "jasmine": true,
     "mocha": true
   },
   "globals": {
-    "-": 0
+    "-": 0,
+    "define": true,
+    "expect": true,
+    "it": true,
+    "require": true
   }
 }
