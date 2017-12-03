@@ -13,8 +13,7 @@ $ [sudo] npm install -g hydra-cli
 ## Command overview
 
 ```
-$ hydra-cli
-hydra-cli version 1.4.8
+hydra-cli version 1.5.5
 Usage: hydra-cli command [parameters]
 See docs at: https://github.com/flywheelsports/hydra-cli
 
@@ -22,21 +21,23 @@ A command line interface for Hydra services
 
 Commands:
   help                         - this help list
+  cfg list serviceName         - display a list of config versions
   cfg pull label               - download configuration file
   cfg push label filename      - update configuration file
-  cfg list serviceName         - display a list of config versions
+  cfg remove label             - remove a configuration version
   config instanceName          - configure connection to redis
   config list                  - display current configuration
-  use instanceName             - specify which redis instance to use
+  use instanceName             - name of redis instance to use
   health [serviceName]         - display service health
   healthlog serviceName        - display service health log
   message create               - create a message object
   message send message.json    - send a message
   nodes [serviceName]          - display service instance nodes
+  redis info                   - display redis info
   refresh node list            - refresh list of nodes
   rest path [payload.json]     - make an HTTP RESTful call to a service
   routes [serviceName]         - display service API routes
-  services [serviceName]       - display list of registered services
+  services [serviceName]       - display list of services
   shell                        - display command to open redis shell
 ```
 
@@ -71,6 +72,12 @@ You can retrieve a list of config versions for a given service using:
 
 ```shell
 $ hydra-cli cfg list myservice
+```
+
+To remove an entry, use:
+
+```shell
+$ hydra-cli cfg remove myservice:0.0.1
 ```
 
 ## config
@@ -242,6 +249,24 @@ $ hydra-cli nodes
     "elapsed": 4
   }
 ]
+```
+
+## redis
+You can pull Redis runtime info using:
+
+```shell
+$ hydra-cli redis info
+# Server
+redis_version:3.0.7
+redis_git_sha1:00000000
+redis_git_dirty:0
+redis_build_id:9608eaf6bab769c5
+redis_mode:standalone
+os:Linux 4.9.49-moby x86_64
+arch_bits:64
+multiplexing_api:epoll
+gcc_version:4.9.2
+...
 ```
 
 ## refresh
