@@ -33,9 +33,10 @@ class Program {
     console.log('');
     console.log('Commands:');
     console.log('  help                         - this help list');
+    console.log('  cfg list serviceName         - display a list of config versions');
     console.log('  cfg pull label               - download configuration file');
     console.log('  cfg push label filename      - update configuration file');
-    console.log('  cfg list serviceName         - display a list of config versions');
+    console.log('  cfg remove label             - remove a configuration version');
     console.log('  config instanceName          - configure connection to redis');
     console.log('  config list                  - display current configuration');
     console.log('  use instanceName             - name of redis instance to use');
@@ -44,6 +45,7 @@ class Program {
     console.log('  message create               - create a message object');
     console.log('  message send message.json    - send a message');
     console.log('  nodes [serviceName]          - display service instance nodes');
+    console.log('  redis info                   - display redis info');
     console.log('  refresh node list            - refresh list of nodes');
     console.log('  rest path [payload.json]     - make an HTTP RESTful call to a service');
     console.log('  routes [serviceName]         - display service API routes');
@@ -187,6 +189,9 @@ class Program {
       case 'refresh':
         this.handleRefresh(args);
         break;
+      case 'redis':
+        this.handleRedis(args);
+        break;
       case 'rest':
         this.handleRest(args);
         break;
@@ -303,6 +308,29 @@ class Program {
         });
     }
 
+    if (args[0] === 'remove') {
+      if (!args[1]) {
+        console.log('Label is required.');
+        this.exitApp();
+        return;
+      }
+      let segs = args[1].split(':');
+      if (segs.length !== 2) {
+        console.log('Label format must be in serviceName:version format.');
+        this.exitApp();
+        return;
+      }
+      let redisClient = hydra.getClonedRedisClient();
+      redisClient.hdel(`hydra:service:${segs[0]}:configs`, segs[1], (err, result) => {
+        if (result > 0) {
+          console.log(`Removed entry ${args[1]}`);
+        } else {
+          console.log(`Unable to locate entry for ${args[1]}`);
+        }
+        redisClient.quit();
+        this.exitApp();
+      });
+    }
   }
 
   /**
@@ -492,6 +520,35 @@ class Program {
         this.exitApp();
       })
       .catch(err => console.log(err));
+  }
+
+  /**
+  * @name handleRedis
+  * @description handle redis calls
+  * @param {array} args - program arguments
+  * @return {undefined}
+  */
+  handleRedis(args) {
+    if (!args[0]) {
+      console.log('requires "info" option');
+      this.exitApp();
+      return;
+    }
+
+    if (args[0] === 'info') {
+      let redisClient = hydra.getClonedRedisClient();
+      redisClient.info((err, result) => {
+        if (!err) {
+          console.log(`${result}`);
+        } else {
+          console.log(err);
+        }
+        redisClient.quit();
+        this.exitApp();
+      });
+    }
+
+    this.exitApp();
   }
 
   /**
