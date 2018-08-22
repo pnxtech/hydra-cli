@@ -102,7 +102,8 @@ class Program {
               'redis': {
                 'url': this.configData.redisUrl || '',
                 'port': this.configData.redisPort || 0,
-                'db': this.configData.redisDb || 0
+                'db': this.configData.redisDb || 0,
+                'password': this.configData.redisPassword || null
               }
             }
           };
@@ -356,24 +357,28 @@ class Program {
     prompts.question('redisUrl: ', (redisUrl) => {
       prompts.question('redisPort: ', (redisPort) => {
         prompts.question('redisDb: ', (redisDb) => {
-          let data = this.configData || {
-            version: CONFIG_FILE_VERSION
-          };
-          Object.assign(data, {
-            redisUrl,
-            redisPort,
-            redisDb,
-            [this.configName]: {
+          prompts.question('redisPassword (blank for null): ', (redisPassword)=>{          
+            let data = this.configData || {
+              version: CONFIG_FILE_VERSION
+            };
+            Object.assign(data, {
               redisUrl,
               redisPort,
-              redisDb
-            }
-          });
-          fs.writeFile(this.hydraConfig, JSON.stringify(data), (err) => {
-            if (err) {
-              console.log(err.message);
-            }
-            process.exit();
+              redisDb,
+              redisPassword,
+              [this.configName]: {
+                redisUrl,
+                redisPort,
+                redisDb,
+                redisPassword
+              }
+            });
+            fs.writeFile(this.hydraConfig, JSON.stringify(data), (err) => {
+              if (err) {
+                console.log(err.message);
+              }
+              process.exit();
+            });
           });
         });
       });
