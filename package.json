@@ -1,6 +1,6 @@
 {
   "name": "hydra-cli",
-  "version": "1.5.5",
+  "version": "1.5.6",
   "description": "Hydra Commandline Interface",
   "author": "Carlos Justiniano <carlos.justiniano@gmail.com>",
   "keywords": [
@@ -17,7 +17,7 @@
   "repository": "flywheelsports/hydra-cli",
   "dependencies": {
     "bluebird": "3.5.1",
-    "hydra": "1.5.5"
+    "hydra": "1.7.0"
   },
   "devDependencies": {
     "chai": "3.5.0",
