@@ -12,7 +12,13 @@ const UMFMessage = hydra.getUMFMessageHelper();
 
 const CONFIG_FILE_VERSION = 2;
 
+/**
+ * @name Program
+ */
 class Program {
+  /**
+   * @name constructor
+   */
   constructor() {
     this.configData = null;
     this.configName = '';
@@ -556,7 +562,7 @@ class Program {
         this.displayJSON(serviceList);
         this.exitApp();
       })
-      .catch(err => console.log(err));
+      .catch((err) => console.log(err));
   }
 
   /**
@@ -674,7 +680,7 @@ class Program {
         this.displayJSON(routes);
         this.exitApp();
       })
-      .catch(err => console.log(err.message));
+      .catch((err) => console.log(err.message));
   }
 
   /**
@@ -700,7 +706,7 @@ class Program {
         this.displayJSON(serviceList);
         this.exitApp();
       })
-      .catch(err => console.log(err.message));
+      .catch((err) => console.log(err.message));
   }
 
   /**
@@ -726,7 +732,7 @@ class Program {
         console.log(`${ids.length} entries removed`);
         this.exitApp();
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
         this.exitApp();
       });
