@@ -13,7 +13,7 @@ $ [sudo] npm install -g hydra-cli
 ## Command overview
 
 ```
-hydra-cli version 1.5.6
+hydra-cli version 1.6.0
 Usage: hydra-cli command [parameters]
 See docs at: https://github.com/flywheelsports/hydra-cli
 
@@ -32,6 +32,7 @@ Commands:
   healthlog serviceName        - display service health log
   message create               - create a message object
   message send message.json    - send a message
+  message queue message.json   - queue a message
   nodes [serviceName]          - display service instance nodes
   redis info                   - display redis info
   refresh node list            - refresh list of nodes
@@ -214,6 +215,14 @@ The `message send` command sends a [UMF](https://github.com/cjus/umf) fomatted m
 ```shell
 $ hydra-cli message send message.json
 ```
+
+## message queue
+
+```shell
+$ hydra-cli message queue message.json
+```
+
+Like send message but the message is pushed on the a service's queue rather then sent directly to a service.
 
 ## nodes
 

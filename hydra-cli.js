@@ -12,7 +12,13 @@ const UMFMessage = hydra.getUMFMessageHelper();
 
 const CONFIG_FILE_VERSION = 2;
 
+/**
+ * @name Program
+ */
 class Program {
+  /**
+   * @name constructor
+   */
   constructor() {
     this.configData = null;
     this.configName = '';
@@ -44,6 +50,7 @@ class Program {
     console.log('  healthlog serviceName        - display service health log');
     console.log('  message create               - create a message object');
     console.log('  message send message.json    - send a message');
+    console.log('  message queue message.json   - queue a message');
     console.log('  nodes [serviceName]          - display service instance nodes');
     console.log('  redis info                   - display redis info');
     console.log('  refresh node list            - refresh list of nodes');
@@ -102,11 +109,13 @@ class Program {
               'redis': {
                 'url': this.configData.redisUrl || '',
                 'port': this.configData.redisPort || 0,
-                'db': this.configData.redisDb || 0,
-                'password': this.configData.redisPassword || null
+                'db': this.configData.redisDb || 0
               }
             }
           };
+          if (this.configData.redisPassword && this.configData.redisPassword !== '') {
+            conf.redis.password = this.configData.redisPassword;
+          }
 
           let tid = setTimeout(() => {
             console.log('Unable to connect to Redis. Use "hydra-cli config list" or "hydra-cli use instanceName" to switch to another instance.');
@@ -177,6 +186,9 @@ class Program {
             break;
           case 'send':
             this.handleMessageSend(args);
+            break;
+          case 'queue':
+            this.handleMessageQueue(args);
             break;
           default:
             console.log(`Unknown message options: ${args[0]}`);
@@ -357,7 +369,7 @@ class Program {
     prompts.question('redisUrl: ', (redisUrl) => {
       prompts.question('redisPort: ', (redisPort) => {
         prompts.question('redisDb: ', (redisDb) => {
-          prompts.question('redisPassword (blank for null): ', (redisPassword)=>{          
+          prompts.question('redisPassword (blank for null): ', (redisPassword)=>{
             let data = this.configData || {
               version: CONFIG_FILE_VERSION
             };
@@ -365,14 +377,16 @@ class Program {
               redisUrl,
               redisPort,
               redisDb,
-              redisPassword,
               [this.configName]: {
                 redisUrl,
                 redisPort,
-                redisDb,
-                redisPassword
+                redisDb
               }
             });
+            if (redisPassword && redisPassword !== '') {
+              data.redisPassword = redisPassword;
+              data[this.configName].redisPassword = redisPassword;
+            }
             fs.writeFile(this.hydraConfig, JSON.stringify(data), (err) => {
               if (err) {
                 console.log(err.message);
@@ -502,6 +516,30 @@ class Program {
   }
 
   /**
+  * @name handleMessageQueue
+  * @description Queue message
+  * @param {array} args - program arguments
+  * @return {undefined}
+  */
+  handleMessageQueue(args) {
+    if (args.length !== 2) {
+      console.log('Invalid number of parameters');
+      this.exitApp();
+      return;
+    }
+    config.init(args[1])
+      .then(() => {
+        hydra.queueMessage(config.getObject());
+        this.exitApp();
+        return null;
+      })
+      .catch((err) => {
+        console.log(err.message);
+        this.exitApp();
+      });
+  }
+
+  /**
   * @name handleNodesList
   * @description handle the display of service nodes.
   * @param {array} args - program arguments
@@ -524,7 +562,7 @@ class Program {
         this.displayJSON(serviceList);
         this.exitApp();
       })
-      .catch(err => console.log(err));
+      .catch((err) => console.log(err));
   }
 
   /**
@@ -642,7 +680,7 @@ class Program {
         this.displayJSON(routes);
         this.exitApp();
       })
-      .catch(err => console.log(err.message));
+      .catch((err) => console.log(err.message));
   }
 
   /**
@@ -668,7 +706,7 @@ class Program {
         this.displayJSON(serviceList);
         this.exitApp();
       })
-      .catch(err => console.log(err.message));
+      .catch((err) => console.log(err.message));
   }
 
   /**
@@ -694,7 +732,7 @@ class Program {
         console.log(`${ids.length} entries removed`);
         this.exitApp();
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
         this.exitApp();
       });
