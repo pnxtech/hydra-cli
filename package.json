@@ -1,6 +1,6 @@
 {
   "name": "hydra-cli",
-  "version": "1.5.6",
+  "version": "1.5.9",
   "description": "Hydra Commandline Interface",
   "author": "Carlos Justiniano <carlos.justiniano@gmail.com>",
   "keywords": [
@@ -21,10 +21,10 @@
   },
   "devDependencies": {
     "chai": "3.5.0",
-    "eslint": "3.19.0",
+    "eslint": "5.15.3",
     "eslint-config-google": "0.7.1",
     "eslint-plugin-mocha": "4.9.0",
-    "mocha": "3.3.0",
+    "mocha": "6.0.2",
     "redis-mock": "0.17.0"
   },
   "bin": {

@@ -102,11 +102,13 @@ class Program {
               'redis': {
                 'url': this.configData.redisUrl || '',
                 'port': this.configData.redisPort || 0,
-                'db': this.configData.redisDb || 0,
-                'password': this.configData.redisPassword || null
+                'db': this.configData.redisDb || 0
               }
             }
           };
+          if (this.configData.redisPassword && this.configData.redisPassword !== '') {
+            conf.redis.password = this.configData.redisPassword;
+          }
 
           let tid = setTimeout(() => {
             console.log('Unable to connect to Redis. Use "hydra-cli config list" or "hydra-cli use instanceName" to switch to another instance.');
@@ -115,6 +117,7 @@ class Program {
             return;
           }, 5000);
 
+          console.log(conf);
           hydra.init(conf)
             .then(() => {
               this.processCommand(command, args);
@@ -357,7 +360,7 @@ class Program {
     prompts.question('redisUrl: ', (redisUrl) => {
       prompts.question('redisPort: ', (redisPort) => {
         prompts.question('redisDb: ', (redisDb) => {
-          prompts.question('redisPassword (blank for null): ', (redisPassword)=>{          
+          prompts.question('redisPassword (blank for null): ', (redisPassword)=>{
             let data = this.configData || {
               version: CONFIG_FILE_VERSION
             };
@@ -365,14 +368,16 @@ class Program {
               redisUrl,
               redisPort,
               redisDb,
-              redisPassword,
               [this.configName]: {
                 redisUrl,
                 redisPort,
-                redisDb,
-                redisPassword
+                redisDb
               }
             });
+            if (redisPassword && redisPassword !== '') {
+              data.redisPassword = redisPassword;
+              data[this.configName].redisPassword = redisPassword;
+            }
             fs.writeFile(this.hydraConfig, JSON.stringify(data), (err) => {
               if (err) {
                 console.log(err.message);
