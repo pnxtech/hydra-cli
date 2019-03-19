@@ -44,6 +44,7 @@ class Program {
     console.log('  healthlog serviceName        - display service health log');
     console.log('  message create               - create a message object');
     console.log('  message send message.json    - send a message');
+    console.log('  message queue message.json   - queue a message');
     console.log('  nodes [serviceName]          - display service instance nodes');
     console.log('  redis info                   - display redis info');
     console.log('  refresh node list            - refresh list of nodes');
@@ -117,7 +118,6 @@ class Program {
             return;
           }, 5000);
 
-          console.log(conf);
           hydra.init(conf)
             .then(() => {
               this.processCommand(command, args);
@@ -180,6 +180,9 @@ class Program {
             break;
           case 'send':
             this.handleMessageSend(args);
+            break;
+          case 'queue':
+            this.handleMessageQueue(args);
             break;
           default:
             console.log(`Unknown message options: ${args[0]}`);
@@ -497,6 +500,30 @@ class Program {
     config.init(args[1])
       .then(() => {
         hydra.sendMessage(config.getObject());
+        this.exitApp();
+        return null;
+      })
+      .catch((err) => {
+        console.log(err.message);
+        this.exitApp();
+      });
+  }
+
+  /**
+  * @name handleMessageQueue
+  * @description Queue message
+  * @param {array} args - program arguments
+  * @return {undefined}
+  */
+  handleMessageQueue(args) {
+    if (args.length !== 2) {
+      console.log('Invalid number of parameters');
+      this.exitApp();
+      return;
+    }
+    config.init(args[1])
+      .then(() => {
+        hydra.queueMessage(config.getObject());
         this.exitApp();
         return null;
       })
