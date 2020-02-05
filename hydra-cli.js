@@ -114,7 +114,7 @@ class Program {
             }
           };
           if (this.configData.redisPassword && this.configData.redisPassword !== '') {
-            conf.redis.password = this.configData.redisPassword;
+            conf.hydra.redis.password = this.configData.redisPassword;
           }
 
           let tid = setTimeout(() => {
