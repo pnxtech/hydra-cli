@@ -626,9 +626,22 @@ class Program {
           });
           hydra.makeAPIRequest(msg)
             .then((res) => {
-              res.result = res.payLoad.toString('utf8');
-              delete res.payLoad;
-              this.displayJSON(res);
+              if((res.payLoad ?? res) == undefined) {
+                console.trace(`Error parsing response from service.`);
+                this.exitApp();
+                return;
+              }
+              const consoleOutput = {statusCode: res.statusCode, statusMessage: res.statusMessage, statusDescription: res.statusDescription, headers: res.headers}
+              consoleOutput.result = res.payLoad != null ? res.payLoad.toString(): (() => {
+                const internalKeys = Object.keys(consoleOutput)
+                const resultObj = {};
+                Object.entries(res).forEach(([key, val]) => {
+                  if(!internalKeys.includes(key) && !(key == "result" && Object.entries(val).length == 0)) resultObj[key] = val;
+                })
+                return resultObj;
+              })()
+              if(res.payLoad != undefined) delete res.payLoad;
+              this.displayJSON(consoleOutput);
               this.exitApp();
             })
             .catch((err) => {
@@ -649,9 +662,22 @@ class Program {
       });
       hydra.makeAPIRequest(msg)
         .then((res) => {
-          res.result = res.payLoad.toString('utf8');
-          delete res.payLoad;
-          this.displayJSON(res);
+          if((res.payLoad ?? res) == undefined) {
+            console.trace(`Error parsing response from service.`);
+            this.exitApp();
+            return;
+          }
+          const consoleOutput = {statusCode: res.statusCode, statusMessage: res.statusMessage, statusDescription: res.statusDescription, headers: res.headers}
+          consoleOutput.result = res.payLoad != null ? res.payLoad.toString(): (() => {
+            const internalKeys = Object.keys(consoleOutput)
+            const resultObj = {};
+            Object.entries(res).forEach(([key, val]) => {
+              if(!internalKeys.includes(key) && !(key == "result" && Object.entries(val).length == 0)) resultObj[key] = val;
+            })
+            return resultObj;
+          })()
+          if(res.payLoad != undefined) delete res.payLoad;
+          this.displayJSON(consoleOutput);
           this.exitApp();
         })
         .catch((err) => {
