@@ -626,7 +626,7 @@ class Program {
           });
           hydra.makeAPIRequest(msg)
             .then((res) => {
-              if((res.payLoad ?? res) == undefined) {
+              if ((res.payLoad ?? res) == undefined) {
                 console.trace(`Error parsing response from service.`);
                 this.exitApp();
                 return;
@@ -636,11 +636,15 @@ class Program {
                 const internalKeys = Object.keys(consoleOutput)
                 const resultObj = {};
                 Object.entries(res).forEach(([key, val]) => {
-                  if(!internalKeys.includes(key) && !(key == "result" && Object.entries(val).length == 0)) resultObj[key] = val;
+                  if (!internalKeys.includes(key) && !(key == "result" && Object.entries(val).length == 0)) {
+                    resultObj[key] = val;
+                  }
                 })
                 return resultObj;
               })()
-              if(res.payLoad != undefined) delete res.payLoad;
+              if (res.payLoad != undefined) {
+                delete res.payLoad;
+              }
               this.displayJSON(consoleOutput);
               this.exitApp();
             })
@@ -662,7 +666,7 @@ class Program {
       });
       hydra.makeAPIRequest(msg)
         .then((res) => {
-          if((res.payLoad ?? res) == undefined) {
+          if ((res.payLoad ?? res) == undefined) {
             console.trace(`Error parsing response from service.`);
             this.exitApp();
             return;
@@ -672,11 +676,15 @@ class Program {
             const internalKeys = Object.keys(consoleOutput)
             const resultObj = {};
             Object.entries(res).forEach(([key, val]) => {
-              if(!internalKeys.includes(key) && !(key == "result" && Object.entries(val).length == 0)) resultObj[key] = val;
+              if (!internalKeys.includes(key) && !(key == "result" && Object.entries(val).length == 0)) {
+                resultObj[key] = val;
+              }
             })
             return resultObj;
           })()
-          if(res.payLoad != undefined) delete res.payLoad;
+          if (res.payLoad != undefined) {
+            delete res.payLoad;
+          }
           this.displayJSON(consoleOutput);
           this.exitApp();
         })
